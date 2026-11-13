@@ -5611,7 +5611,7 @@ nav.tabs button[aria-selected="true"] { color: var(--accent); background: var(--
   // ---- ตารางเดิน (ช่อง 8px) สำหรับ NPC ----
   function buildNav() {
     navW = MW / 8; navH = MH / 8; nav = new Uint8Array(navW * navH);
-    const probe = { hw: 6, hh: 6 };
+    const probe = { hw: 4, hh: 5 };
     for (let r = 0; r < navH; r++) for (let c = 0; c < navW; c++) nav[r * navW + c] = blocked(probe, c * 8 + 4, r * 8 + 6) ? 0 : 1;
   }
   function path(from, to) {
@@ -5716,7 +5716,7 @@ nav.tabs button[aria-selected="true"] { color: var(--accent); background: var(--
   }
   function staffRoute(p, to) {
     const a = nearestWalkable(p.x, p.y), b = nearestWalkable(to.x, to.y);
-    const mid = path({ c: a.c, r: a.r }, { c: b.c, r: b.r }) || [];
+    const mid = path({ c: a.c, r: a.r }, { c: b.c, r: b.r }) || [{ x: b.x, y: b.y }];
     return [{ x: a.x, y: a.y }, ...mid];
   }
   function setRole(role, active = true) {
