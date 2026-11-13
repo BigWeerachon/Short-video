@@ -7,7 +7,7 @@
 :root {
   /* โทนดาร์คแบบ Claude: เทาอุ่น + ส้มดินเผา */
   --bg: #262624; --surface: #30302e; --ink: #faf9f5; --muted: #a6a39a; --line: #3e3e3a;
-  --accent: #d97757; --accent-2: #e8a17f; --accent-soft: #4a3329;
+  --accent: #2fb4d6; --accent-2: #2fdfa0; --accent-soft: #173a45;
   --ok: #7fb685; --warn: #e0b45c; --idle: #5c5a54;
   --font-display: 'Kanit', 'IBM Plex Sans Thai', system-ui, sans-serif;
   --font-body: 'IBM Plex Sans Thai', 'Kanit', system-ui, sans-serif;
@@ -32,7 +32,7 @@ h2 { font-family: var(--font-display); font-weight: 500; font-size: 17px; margin
 .rooms span { align-self: end; justify-self: center; margin-bottom: 4%; font-family: var(--font-display); font-size: 11px; font-weight: 500; padding: 1px 9px; border-radius: 6px;
   border: 1.5px solid rgba(250, 249, 245, 0.3); box-shadow: 0 2px 0 rgba(0,0,0,0.25);
   background: rgba(31, 30, 29, 0.85); color: #faf9f5; }
-.rooms span.on { background: #d97757; color: #faf9f5; border-color: #faf9f5; }
+.rooms span.on { background: linear-gradient(90deg, #0a6fc9, #2fdfa0); color: #ffffff; border-color: #faf9f5; }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .muted { color: var(--muted); font-size: 13px; }
@@ -377,7 +377,7 @@ nav.tabs button[aria-selected="true"] { color: var(--accent); background: var(--
     }
     if (activeRoom) { // ไฮไลต์ห้องที่ทำงานอยู่
       const { c, r } = org(ridx(activeRoom)), a = 0.55 + 0.25 * Math.sin(t * 3);
-      g.strokeStyle = `rgba(217,119,87,${a})`; g.lineWidth = 2; g.strokeRect(c * T + 2, r * T + 2, RC * T - 4, RR * T - 4);
+      g.strokeStyle = `rgba(47,223,160,${a})`; g.lineWidth = 2; g.strokeRect(c * T + 2, r * T + 2, RC * T - 4, RR * T - 4);
     }
     requestAnimationFrame(frame);
   }
