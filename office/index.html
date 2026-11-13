@@ -34,12 +34,13 @@ h1 b { color: var(--accent); font-weight: 600; }
 h2 { font-family: var(--font-display); font-weight: 500; font-size: 17px; margin: 0; }
 .view { display: flex; flex-direction: column; gap: 14px; }
 /* ออฟฟิศ */
-.office { position: relative; border-radius: var(--radius); overflow: hidden; background: var(--wall); }
+.office { position: relative; border-radius: var(--radius); overflow: hidden; background: #2a2236; box-shadow: 0 6px 18px rgba(20, 16, 40, 0.18); }
 .office canvas { display: block; width: 100%; height: auto; image-rendering: pixelated; }
 .rooms { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); pointer-events: none; }
-.rooms span { align-self: start; justify-self: start; margin: 5px 6px; font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 99px;
-  background: color-mix(in srgb, var(--surface) 85%, transparent); color: var(--muted); }
-.rooms span.on { background: var(--accent); color: #fff; }
+.rooms span { align-self: end; justify-self: center; margin-bottom: 4%; font-family: var(--font-display); font-size: 11px; font-weight: 500; padding: 1px 9px; border-radius: 6px;
+  border: 1.5px solid rgba(255, 214, 90, 0.55); box-shadow: 0 2px 0 rgba(0,0,0,0.25);
+  background: rgba(42, 34, 54, 0.82); color: #fff3d6; }
+.rooms span.on { background: #f2b134; color: #2a2236; border-color: #fff3d6; }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .muted { color: var(--muted); font-size: 13px; }
@@ -91,7 +92,7 @@ nav.tabs button[aria-selected="true"] { color: var(--accent); background: var(--
 
   <section class="view" id="view-office">
     <div class="office" id="officeBox">
-      <canvas id="px" width="180" height="210" aria-label="ออฟฟิศพิกเซล แสดงตำแหน่งที่กำลังทำงาน"></canvas>
+      <canvas id="px" width="480" height="528" aria-label="แผนที่ออฟฟิศ แสดงตำแหน่งที่กำลังทำงาน"></canvas>
       <div class="rooms" id="rooms"></div>
     </div>
     <div class="card" id="jobCard"></div>
@@ -146,108 +147,246 @@ nav.tabs button[aria-selected="true"] { color: var(--accent); background: var(--
   tabs.forEach((t) => $('tab-' + t).addEventListener('click', () => show(t)));
   try { const t = localStorage.getItem('tab'); if (tabs.includes(t)) show(t); } catch (e) {}
 
-  // ---------- ออฟฟิศพิกเซล ----------
+  // ---------- ออฟฟิศ (แผนที่แบบเกม มุมมองด้านบนเฉียง) ----------
   const cv = $('px'), g = cv.getContext('2d');
-  const RW = 60, RH = 70; // ห้องละ 60×70 px (ตรรกะ)
+  const T = 16, RC = 10, RR = 11, COLS = 30, ROWS = 33; // ห้องละ 10×11 ช่อง (3 แถวบนเป็นผนัง)
+  cv.width = COLS * T; cv.height = ROWS * T;
   $('rooms').innerHTML = ROOMS.map(([id, th]) => `<span data-room="${id}">${th}</span>`).join('');
-  const roomCenter = (room) => { const i = ROOMS.findIndex((r) => r[0] === room); return { x: (i % 3) * RW + RW / 2, y: Math.floor(i / 3) * RH + 46, i }; };
-  // ตัวละคร: แต่ละตำแหน่งนั่งโต๊ะในห้องตัวเอง
+  const O = '#2a2236';
+  const R = (x, y, w, h, c) => { g.fillStyle = c; g.fillRect(x | 0, y | 0, w, h); };
+  const box = (x, y, w, h, fill, line = O) => { R(x, y, w, h, line); R(x + 1, y + 1, w - 2, h - 2, fill); };
+  const org = (i) => ({ c: (i % 3) * RC, r: Math.floor(i / 3) * RR });
+  const ridx = (id) => ROOMS.findIndex((r) => r[0] === id);
+
+  const FLOORS = {
+    director: ['wood', '#c98a52', '#b3753f'], writer: ['check', '#efe0bf', '#e2cc9f'], sound: ['carpet', '#4b6aa8', '#43609a'],
+    'film-director': ['wood', '#b8794a', '#a1663a'], animator: ['check', '#f3e6cf', '#e6d3b0'], editor: ['tile', '#d9dee8', '#c7cedc'],
+    critic: ['carpet', '#8c3b4a', '#7d3341'], marketing: ['wood', '#d49a5c', '#bd8447'], library: ['carpet', '#4f8a64', '#467c59'],
+  };
+  const WALLS = { director: '#c6d0e4', writer: '#e9dcc4', sound: '#3f4a6b', 'film-director': '#d8c6b0', animator: '#e8d9f0',
+    editor: '#c9d4dc', critic: '#4a3142', marketing: '#cfe0d6', library: '#d9cdb5' };
+
+  // ---- ช่องเดินได้ ----
+  const block = new Uint8Array(COLS * ROWS);
+  const B = (c, r, w = 1, h = 1) => { for (let y = r; y < r + h; y++) for (let x = c; x < c + w; x++) block[y * COLS + x] = 1; };
+  ROOMS.forEach((_, i) => {
+    const { c, r } = org(i);
+    B(c, r, RC, 3);                                                // ผนังหลัง
+    if (i >= 3) { block[(r + 1) * COLS + c + 4] = 0; block[(r + 1) * COLS + c + 5] = 0; block[(r + 2) * COLS + c + 4] = 0; block[(r + 2) * COLS + c + 5] = 0; block[r * COLS + c + 4] = 0; block[r * COLS + c + 5] = 0; } // ประตูบน
+    if (i % 3) { B(c, r + 3, 1, RR - 3); block[(r + 7) * COLS + c] = 0; block[(r + 8) * COLS + c] = 0; } // ผนังกั้นซ้าย + ประตู
+  });
+
+  // ---- เฟอร์นิเจอร์ (ห้อง, ชนิด, คอลัมน์, แถว ภายในห้อง) ----
+  const F = [];
+  const put = (room, type, c, r, w, h, solid = true, opt = {}) => { const o = org(ridx(room)); F.push({ room, type, x: (o.c + c) * T, y: (o.r + r) * T, w, h, opt }); if (solid) B(o.c + c, o.r + r, w, h); };
+  const desk = (room, c, r, top = 'monitor') => put(room, 'desk', c, r, 3, 1, true, { top });
+  // ผู้อำนวยการ
+  put('director', 'rug', 2, 4, 6, 5, false, { col: '#7a4b8c' }); put('director', 'frame', 2, 1, 2, 1, false); put('director', 'clock', 7, 1, 1, 1, false);
+  put('director', 'shelf', 8, 2, 1, 2); desk('director', 3, 6, 'lamp'); put('director', 'plant', 1, 3, 1, 1); put('director', 'trophy', 5, 1, 1, 1, false);
+  // ผู้เขียนบท
+  put('writer', 'shelf', 1, 2, 1, 2); put('writer', 'shelf', 8, 2, 1, 2); desk('writer', 3, 6, 'type'); put('writer', 'notes', 4, 1, 2, 1, false); put('writer', 'plant', 8, 9, 1, 1);
+  // ห้องเสียง
+  put('sound', 'panel', 1, 1, 2, 1, false); put('sound', 'panel', 7, 1, 2, 1, false); desk('sound', 3, 6, 'mixer'); put('sound', 'speaker', 1, 5, 1, 1); put('sound', 'speaker', 8, 5, 1, 1); put('sound', 'mic', 7, 8, 1, 1);
+  // ผู้กำกับ
+  put('film-director', 'cork', 1, 1, 3, 1, false); put('film-director', 'clap', 7, 1, 1, 1, false); desk('film-director', 3, 6, 'script'); put('film-director', 'camera', 8, 8, 1, 1); put('film-director', 'plant', 1, 9, 1, 1);
+  // แอนิเมชัน
+  put('animator', 'poster', 1, 1, 2, 1, false); put('animator', 'poster2', 7, 1, 2, 1, false); desk('animator', 3, 6, 'dual'); put('animator', 'easel', 8, 4, 1, 2); put('animator', 'plant', 1, 3, 1, 1);
+  // ตัดต่อ
+  put('editor', 'rack', 8, 2, 1, 2); put('editor', 'wallscreen', 1, 1, 3, 1, false); desk('editor', 3, 6, 'timeline'); put('editor', 'plant', 1, 3, 1, 1); put('editor', 'bin', 7, 7, 1, 1);
+  // ห้องฉาย
+  put('critic', 'screen', 6, 1, 3, 1, false); put('critic', 'frame', 1, 1, 2, 1, false); put('critic', 'sofa', 3, 8, 4, 1); put('critic', 'popcorn', 8, 8, 1, 1); desk('critic', 3, 5, 'notes');
+  // การตลาด
+  put('marketing', 'board', 6, 1, 3, 1, false); desk('marketing', 1, 6, 'monitor'); desk('marketing', 6, 6, 'laptop'); put('marketing', 'cooler', 8, 3, 1, 1); put('marketing', 'plant', 1, 3, 1, 1);
+  // คลังงาน
+  put('library', 'shelf', 1, 2, 1, 2); put('library', 'shelf', 3, 2, 1, 2); put('library', 'shelf', 6, 2, 1, 2); put('library', 'shelf', 8, 2, 1, 2);
+  desk('library', 3, 6, 'books'); put('library', 'cabinet', 8, 8, 1, 1); put('library', 'boxes', 1, 8, 1, 1);
+
+  // ---- ตัวละคร ----
+  const LOOK = {
+    director: { shirt: '#5b3fc4', hair: '#2a2230', style: 'neat', acc: 'tie' }, writer: { shirt: '#e8794a', hair: '#7a4a2a', style: 'bun' },
+    sound: { shirt: '#2aa7c9', hair: '#2a2230', style: 'spiky', acc: 'phones' }, 'film-director': { shirt: '#d6455d', hair: '#3a2a20', style: 'cap' },
+    animator: { shirt: '#f2b134', hair: '#d0603a', style: 'long' }, editor: { shirt: '#3c8f5a', hair: '#2a2230', style: 'short', acc: 'glasses' },
+    critic: { shirt: '#7a5c3c', hair: '#9aa0ad', style: 'short', acc: 'glasses' }, marketer: { shirt: '#e15fa8', hair: '#2a2230', style: 'long' },
+    planner: { shirt: '#4f7ce8', hair: '#5a3a22', style: 'short' }, librarian: { shirt: '#8a8fa6', hair: '#c9a46a', style: 'bun', acc: 'glasses' },
+  };
+  const SEAT = { director: [4, 5], writer: [4, 5], sound: [4, 5], 'film-director': [4, 5], animator: [4, 5], editor: [4, 5], critic: [4, 4], marketer: [2, 5], planner: [7, 5], librarian: [4, 5] };
   const chars = {};
   Object.keys(ROLE_ROOM).forEach((role) => {
-    const c = roomCenter(ROLE_ROOM[role]);
-    const off = role === 'planner' ? 12 : role === 'marketer' ? -12 : 0;
-    chars[role] = { role, home: { x: c.x + off, y: c.y }, x: c.x + off, y: c.y, path: [], room: ROLE_ROOM[role] };
+    const o = org(ridx(ROLE_ROOM[role])), [sc, sr] = SEAT[role];
+    const home = { c: o.c + sc, r: o.r + sr };
+    chars[role] = { role, home, x: home.c * T, y: home.r * T, dir: 'down', path: [], walking: false };
   });
-  function routeTo(ch, room) {
-    const to = roomCenter(room), from = { x: ch.x, y: ch.y };
-    const hall = Math.floor((from.y) / RH) * RH + RH - 4; // ทางเดินใต้ห้องต้นทาง
-    const colX = to.x;
-    ch.path = [{ x: from.x, y: hall }, { x: colX, y: hall }, { x: colX, y: to.y }];
-    ch.target = room;
+  // หาเส้นทาง (BFS บนช่องที่เดินได้)
+  function findPath(from, to) {
+    const key = (c, r) => r * COLS + c, prev = new Int32Array(COLS * ROWS).fill(-1), q = [key(from.c, from.r)];
+    prev[q[0]] = q[0];
+    const free = (c, r) => c >= 0 && r >= 0 && c < COLS && r < ROWS && (!block[key(c, r)] || (c === to.c && r === to.r));
+    while (q.length) {
+      const k = q.shift(), c = k % COLS, r = (k / COLS) | 0;
+      if (c === to.c && r === to.r) break;
+      for (const [dc, dr] of [[0, 1], [1, 0], [0, -1], [-1, 0]]) {
+        const nc = c + dc, nr = r + dr;
+        if (free(nc, nr) && prev[key(nc, nr)] < 0) { prev[key(nc, nr)] = k; q.push(key(nc, nr)); }
+      }
+    }
+    if (prev[key(to.c, to.r)] < 0) return [];
+    const out = [];
+    for (let k = key(to.c, to.r); k !== key(from.c, from.r); k = prev[k]) out.unshift({ c: k % COLS, r: (k / COLS) | 0 });
+    return out;
   }
+  const tileOf = (ch) => ({ c: Math.round(ch.x / T), r: Math.round(ch.y / T) });
+  function walk(ch, to, then) { ch.path = findPath(tileOf(ch), to); ch.then = then; }
   let lastRole = null;
   function onJob() {
     const role = S.job && S.job.status !== 'done' ? S.job.role : null;
     if (role && lastRole && role !== lastRole && chars[lastRole]) {
-      // คนเดิมเดินเอางานไปส่งห้องใหม่ แล้วเดินกลับ
-      const ch = chars[lastRole];
-      routeTo(ch, ROLE_ROOM[role]);
-      ch.returnAfter = true;
+      const ch = chars[lastRole], o = org(ridx(ROLE_ROOM[role]));
+      walk(ch, { c: o.c + 4, r: o.r + 8 }, () => { ch.dir = 'up'; ch.pause = 1.4; }); // เดินเอาแฟ้มไปส่งหน้าโต๊ะ
     }
     lastRole = role;
     document.querySelectorAll('#rooms span').forEach((s) => s.classList.toggle('on', !!role && s.dataset.room === ROLE_ROOM[role]));
   }
   function step(dt) {
     for (const ch of Object.values(chars)) {
-      if (!ch.path.length) continue;
-      const p = ch.path[0], dx = p.x - ch.x, dy = p.y - ch.y, d = Math.hypot(dx, dy), v = 34 * dt;
-      if (d <= v) { ch.x = p.x; ch.y = p.y; ch.path.shift(); } else { ch.x += dx / d * v; ch.y += dy / d * v; }
+      if (ch.pause > 0) { ch.pause -= dt; if (ch.pause <= 0) walk(ch, ch.home, () => { ch.dir = 'down'; }); continue; }
+      if (!ch.path.length) { ch.walking = false; continue; }
+      const p = ch.path[0], tx = p.c * T, ty = p.r * T, dx = tx - ch.x, dy = ty - ch.y, d = Math.hypot(dx, dy), v = 46 * dt;
       ch.walking = true;
-      if (!ch.path.length) {
-        ch.walking = false;
-        ch.room = ch.target;
-        if (ch.returnAfter) { ch.returnAfter = false; ch.pause = 1.2; }
-      }
-    }
-    for (const ch of Object.values(chars)) {
-      if (ch.pause > 0) { ch.pause -= dt; if (ch.pause <= 0) { routeTo(ch, ROLE_ROOM[ch.role]); ch.path[ch.path.length - 1] = { ...ch.home }; } }
+      ch.dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
+      if (d <= v) { ch.x = tx; ch.y = ty; ch.path.shift(); if (!ch.path.length) { ch.walking = false; const f = ch.then; ch.then = null; if (f) f(); } }
+      else { ch.x += dx / d * v; ch.y += dy / d * v; }
     }
   }
-  function px(x, y, w, h, c) { g.fillStyle = c; g.fillRect(Math.round(x), Math.round(y), w, h); }
-  function drawRoom(i, active, t) {
-    const x = (i % 3) * RW, y = Math.floor(i / 3) * RH;
-    px(x, y, RW, RH, css('--wall'));
-    px(x + 2, y + 18, RW - 4, RH - 22, css('--floor'));
-    // ลายพื้น
-    for (let k = 0; k < 6; k++) px(x + 2, y + 24 + k * 8, RW - 4, 1, 'rgba(0,0,0,0.05)');
-    // ของประจำห้อง
-    const id = ROOMS[i][0];
-    if (id === 'sound') { px(x + 6, y + 30, 6, 12, '#2b3045'); px(x + 7, y + 32, 4, 4, '#56607a'); px(x + 48, y + 30, 6, 12, '#2b3045'); }
-    if (id === 'library') for (let k = 0; k < 3; k++) { px(x + 4, y + 24 + k * 9, 14, 2, '#7a5235'); px(x + 5, y + 19 + k * 9, 3, 5, '#e8794a'); px(x + 9, y + 20 + k * 9, 3, 4, '#4f7ce8'); px(x + 13, y + 19 + k * 9, 3, 5, '#22b98a'); }
-    if (id === 'critic') { px(x + 8, y + 22, 44, 14, '#1d2233'); px(x + 10, y + 24, 40, 10, active ? '#ffd86b' : '#3a4260'); }
-    if (id === 'director') { px(x + 46, y + 24, 8, 10, '#f2b134'); px(x + 49, y + 21, 2, 3, '#f2b134'); }
-    if (id === 'writer') { px(x + 6, y + 26, 10, 12, '#ffffff'); px(x + 8, y + 29, 6, 1, '#9aa3bd'); px(x + 8, y + 32, 6, 1, '#9aa3bd'); }
-    if (id === 'animator') { px(x + 46, y + 24, 8, 12, '#ffffff'); px(x + 48, y + 27, 4, 4, '#e8794a'); }
-    if (id === 'editor') { px(x + 6, y + 28, 12, 8, '#2b3045'); px(x + 7, y + 29, 10, 2, '#e15fa8'); px(x + 7, y + 32, 7, 2, '#2aa7c9'); }
-    if (id === 'marketing') { px(x + 6, y + 24, 12, 10, '#ffffff'); px(x + 8, y + 30, 2, 3, '#22b98a'); px(x + 11, y + 28, 2, 5, '#22b98a'); px(x + 14, y + 26, 2, 7, '#22b98a'); }
-    if (id === 'film-director') { px(x + 46, y + 26, 10, 6, '#1d2233'); px(x + 46, y + 25, 10, 2, '#ffffff'); }
-    // ต้นไม้
-    px(x + RW - 9, y + RH - 14, 5, 6, '#c96f4a'); px(x + RW - 11, y + RH - 20, 9, 7, '#2fa86a');
-    if (active) { g.strokeStyle = css('--accent'); g.lineWidth = 2; g.strokeRect(x + 2, y + 2, RW - 4, RH - 4); }
+
+  // ---- วาดพื้นและผนัง ----
+  function drawFloor(i) {
+    const { c, r } = org(i), id = ROOMS[i][0], [kind, a, b] = FLOORS[id], x0 = c * T, y0 = (r + 3) * T, w = RC * T, h = (RR - 3) * T;
+    R(x0, y0, w, h, a);
+    for (let y = 0; y < h; y += 8) for (let x = 0; x < w; x += 8) {
+      const X = x0 + x, Y = y0 + y;
+      if (kind === 'wood') { if (y % 8 === 0) R(X, Y + 7, 8, 1, b); if (((x / 8 + (y / 8) * 3) % 5) === 0) R(X, Y, 1, 7, b); }
+      else if (kind === 'check') { if (((x + y) / 8) % 2) R(X, Y, 8, 8, b); }
+      else if (kind === 'tile') { R(X + 7, Y, 1, 8, b); R(X, Y + 7, 8, 1, b); }
+      else if (kind === 'carpet') { if (((x * 3 + y * 5) / 8) % 4 === 0) R(X + 3, Y + 3, 2, 2, b); }
+    }
   }
-  // โต๊ะ + จอ (วาดหลังคนนั่ง เพื่อให้คนนั่งอยู่หลังโต๊ะ)
-  function drawDesk(i, active, t) {
-    const x = (i % 3) * RW, y = Math.floor(i / 3) * RH;
-    px(x + 18, y + 44, 24, 6, '#9a6b45'); px(x + 20, y + 50, 2, 8, '#7a5235'); px(x + 38, y + 50, 2, 8, '#7a5235');
-    px(x + 25, y + 37, 10, 7, '#2b3045'); px(x + 26, y + 38, 8, 5, active ? (Math.floor(t * 4) % 2 ? '#7cc4ff' : '#a8dcff') : '#56607a');
+  function drawWall(i) {
+    const { c, r } = org(i), id = ROOMS[i][0], x0 = c * T, y0 = r * T, w = RC * T, col = WALLS[id];
+    R(x0, y0, w, 3 * T, col);
+    R(x0, y0, w, 3, O);                                          // ขอบบน
+    for (let y = y0 + 30; y < y0 + 46; y += 2) for (let x = x0 + ((y / 2) % 2); x < x0 + w; x += 2) R(x, y, 1, 1, 'rgba(0,0,0,0.12)'); // บัวผนังลายจุด
+    R(x0, y0 + 29, w, 1, 'rgba(0,0,0,0.25)');
+    R(x0, y0 + 46, w, 2, 'rgba(0,0,0,0.3)');                    // เงาโคนผนัง
+    if (i >= 3) { // ประตูไม้
+      const dx = x0 + 4 * T, dy = y0 + 6;
+      box(dx, dy, 32, 42, '#8a5a34'); R(dx + 3, dy + 3, 26, 36, '#a66d3f'); R(dx + 6, dy + 8, 20, 10, '#b57a49'); R(dx + 25, dy + 22, 2, 2, '#f2c94c');
+      R(dx + 2, y0 + 3 * T, 28, 4, FLOORS[id][1]);
+    }
+    if (i % 3) { // ผนังกั้นซ้าย
+      const px = x0, top = y0 + 3 * T;
+      R(px, top, 4, (RR - 3) * T, O); R(px + 1, top, 2, (RR - 3) * T, '#5b5470');
+      R(px, top + 4 * T, 4, 2 * T, FLOORS[id][1]);             // ช่องประตู
+    }
   }
-  function drawPerson(ch, t, working) {
-    const x = Math.round(ch.x) - 3, bob = ch.walking ? (Math.floor(t * 8) % 2) : (working ? (Math.floor(t * 3) % 2) : 0);
-    const y = Math.round(ch.y) - 14 - (ch.walking ? bob : 0);
-    px(x + 1, y, 5, 2, '#2b2233');            // ผม
-    px(x + 1, y + 2, 5, 4, '#f6c9a2');        // หน้า
-    px(x + 2, y + 3, 1, 1, '#2b2233'); px(x + 4, y + 3, 1, 1, '#2b2233');
-    px(x, y + 6, 7, 5, SHIRT[ch.role]);       // เสื้อ
-    if (working && !ch.walking) { px(x - 1, y + 7 + bob, 1, 2, '#f6c9a2'); px(x + 7, y + 8 - bob, 1, 2, '#f6c9a2'); }
-    const leg = ch.walking ? Math.floor(t * 8) % 2 : 0;
-    px(x + 1, y + 11, 2, 3 - leg, '#3a3350'); px(x + 4, y + 11, 2, 2 + leg, '#3a3350');
-    if (ch.walking) { px(x + 7, y + 7, 4, 3, '#ffffff'); px(x + 8, y + 8, 2, 1, '#9aa3bd'); } // ถือแฟ้มงาน
+
+  // ---- ของในห้อง ----
+  function sprite(f, t, active) {
+    const { x, y, w, h, opt } = f, W = w * T;
+    switch (f.type) {
+      case 'rug': box(x, y, W, h * T, opt.col, '#4a2c5a'); R(x + 4, y + 4, W - 8, h * T - 8, 'rgba(255,255,255,0.12)'); break;
+      case 'desk': {
+        R(x + 2, y + 18, W - 4, 3, 'rgba(0,0,0,0.25)');
+        box(x, y - 2, W, 12, '#d6a56d', '#5a3a22'); R(x + 1, y + 9, W - 2, 6, '#a8743f'); R(x + 2, y + 14, 3, 5, '#6b4527'); R(x + W - 5, y + 14, 3, 5, '#6b4527');
+        const scr = active ? (Math.floor(t * 3) % 2 ? '#8fd3ff' : '#6fc0f5') : '#3b4664';
+        if (opt.top === 'monitor' || opt.top === 'timeline' || opt.top === 'lamp') { box(x + 16, y - 14, 18, 13, scr); R(x + 23, y - 2, 4, 2, '#555'); if (opt.top === 'timeline' && active) { R(x + 18, y - 7, 6, 2, '#e15fa8'); R(x + 25, y - 7, 7, 2, '#2aa7c9'); } }
+        if (opt.top === 'dual') { box(x + 6, y - 14, 17, 12, scr); box(x + 25, y - 14, 17, 12, scr); }
+        if (opt.top === 'laptop') { box(x + 17, y - 10, 14, 9, scr); }
+        if (opt.top === 'type') { box(x + 16, y - 6, 16, 7, '#3a3a48'); R(x + 18, y - 12, 12, 7, '#ffffff'); }
+        if (opt.top === 'mixer') { box(x + 10, y - 5, 28, 7, '#2b3045'); for (let k = 0; k < 6; k++) R(x + 13 + k * 4, y - 3 + (active ? Math.round(Math.sin(t * 6 + k)) : 0), 2, 2, k % 2 ? '#3fd6a6' : '#f2b134'); }
+        if (opt.top === 'script' || opt.top === 'notes' || opt.top === 'books') { R(x + 14, y - 3, 10, 7, '#ffffff'); R(x + 16, y - 1, 6, 1, '#9aa3bd'); R(x + 27, y - 4, 7, 8, '#4f7ce8'); }
+        if (opt.top === 'lamp') { R(x + 4, y - 10, 2, 9, '#444'); R(x + 1, y - 13, 8, 4, '#f2b134'); }
+        R(x + W - 9, y - 4, 5, 5, '#ffffff'); R(x + W - 8, y - 3, 3, 2, '#7a4a2a'); // แก้วกาแฟ
+        break; }
+      case 'shelf': box(x, y - 6, W, h * T + 6, '#9a6b45', '#4a2e1c'); for (let k = 0; k < 3; k++) { R(x + 2, y + k * 10 + 4, W - 4, 2, '#5a3a22'); for (let b = 0; b < 5; b++) R(x + 3 + b * 2, y + k * 10 - 3 + (b % 2), 2, 7 - (b % 2), ['#e8794a', '#4f7ce8', '#22b98a', '#d6455d', '#f2b134'][(b + k) % 5]); } break;
+      case 'plant': R(x + 4, y + 9, 8, 6, '#c96f4a'); R(x + 3, y + 8, 10, 2, '#a85a3a'); for (let k = 0; k < 5; k++) R(x + 2 + k * 2, y + 1 + (k % 2) * 3, 3, 8, k % 2 ? '#2fa86a' : '#3cc47c'); break;
+      case 'frame': box(x + 4, y + 2, 24, 16, '#8fd3ff', '#6b4527'); R(x + 6, y + 12, 20, 5, '#3cc47c'); R(x + 18, y + 5, 4, 4, '#ffd86b'); break;
+      case 'clock': R(x + 3, y + 3, 10, 10, O); R(x + 4, y + 4, 8, 8, '#ffffff'); R(x + 7, y + 5, 1, 4, O); R(x + 8, y + 8, 3, 1, '#d6455d'); break;
+      case 'trophy': R(x + 5, y + 4, 6, 6, '#f2c94c'); R(x + 7, y + 10, 2, 3, '#c9a12a'); R(x + 4, y + 13, 8, 2, '#6b4527'); break;
+      case 'notes': for (let k = 0; k < 3; k++) { R(x + 3 + k * 9, y + 4 + (k % 2) * 3, 7, 8, ['#ffd86b', '#ff9fbf', '#9fe0ff'][k]); } break;
+      case 'panel': for (let k = 0; k < 4; k++) R(x + 2 + k * 7, y + 2, 6, 14, k % 2 ? '#2b3045' : '#353d5c'); break;
+      case 'speaker': box(x + 2, y - 8, 12, 22, '#2b3045'); R(x + 5, y - 4, 6, 6, '#56607a'); R(x + 5, y + 5, 6, 6, '#56607a'); break;
+      case 'mic': R(x + 7, y - 6, 2, 18, '#555'); R(x + 5, y - 10, 6, 6, '#2b3045'); R(x + 4, y + 11, 8, 2, '#333'); break;
+      case 'cork': box(x + 2, y + 1, W - 4, 17, '#c99a63', '#6b4527'); for (let k = 0; k < 5; k++) R(x + 6 + k * 8, y + 4 + (k % 2) * 5, 6, 6, ['#ffffff', '#ffd86b', '#9fe0ff'][k % 3]); break;
+      case 'clap': R(x + 2, y + 6, 12, 9, '#2a2236'); R(x + 2, y + 3, 12, 3, '#ffffff'); R(x + 4, y + 3, 2, 3, O); R(x + 9, y + 3, 2, 3, O); break;
+      case 'camera': R(x + 7, y + 2, 2, 12, '#444'); R(x + 3, y + 13, 10, 2, '#444'); box(x + 2, y - 6, 12, 9, '#2b3045'); R(x + 13, y - 4, 3, 5, '#56607a'); break;
+      case 'poster': box(x + 4, y + 1, 22, 17, '#ffe2bd', '#6b4527'); R(x + 8, y + 5, 6, 6, '#e8794a'); R(x + 16, y + 9, 6, 6, '#4f7ce8'); break;
+      case 'poster2': box(x + 4, y + 1, 22, 17, '#d7f5e3', '#6b4527'); R(x + 8, y + 12, 14, 3, '#22b98a'); R(x + 12, y + 5, 6, 6, '#f2b134'); break;
+      case 'easel': R(x + 3, y - 10, 2, 30, '#6b4527'); R(x + 11, y - 10, 2, 30, '#6b4527'); box(x + 1, y - 12, 14, 14, '#ffffff'); R(x + 4, y - 8, 5, 5, '#e15fa8'); break;
+      case 'rack': box(x, y - 8, W, h * T + 8, '#2b3045'); for (let k = 0; k < 5; k++) { R(x + 2, y - 5 + k * 7, W - 4, 4, '#3b4664'); R(x + 3, y - 4 + k * 7, 2, 2, (Math.floor(t * 4) + k) % 3 ? '#3fd6a6' : '#d6455d'); } break;
+      case 'wallscreen': box(x + 2, y + 2, W - 4, 16, active ? '#1d2233' : '#2b3045'); if (active) { R(x + 6, y + 10, 14, 3, '#e15fa8'); R(x + 22, y + 10, 18, 3, '#2aa7c9'); R(x + 6 + ((t * 20) % 36), y + 4, 1, 12, '#ffffff'); } break;
+      case 'bin': R(x + 4, y + 4, 8, 10, '#7a8299'); R(x + 3, y + 3, 10, 2, '#5b6278'); break;
+      case 'screen': box(x, y - 2, W, 22, active ? '#ffe9a8' : '#3a4260', '#1d2233'); if (active) { R(x + 8, y + 4, 30, 10, '#f2b134'); R(x + 18, y + 6, 6, 6, '#ffffff'); } break;
+      case 'sofa': box(x, y - 4, W, 16, '#d6455d', '#6b2230'); R(x + 2, y - 2, W - 4, 5, '#e86a80'); R(x, y - 6, 6, 18, '#b8384e'); R(x + W - 6, y - 6, 6, 18, '#b8384e'); break;
+      case 'popcorn': R(x + 4, y + 4, 8, 10, '#ffffff'); R(x + 5, y + 4, 2, 10, '#d6455d'); R(x + 9, y + 4, 2, 10, '#d6455d'); R(x + 3, y + 1, 10, 4, '#ffe9a8'); break;
+      case 'board': box(x + 4, y + 1, W - 8, 18, '#ffffff', '#5b6278'); for (let k = 0; k < 4; k++) R(x + 10 + k * 7, y + 14 - k * 3, 5, 4 + k * 3, '#22b98a'); R(x + 10, y + 4, 10, 2, '#4f7ce8'); break;
+      case 'cooler': R(x + 3, y - 4, 10, 16, '#e6ebf3'); box(x + 3, y - 4, 10, 16, '#e6ebf3'); R(x + 4, y - 14, 8, 10, '#8fd3ff'); R(x + 6, y + 2, 4, 2, '#4f7ce8'); break;
+      case 'cabinet': box(x + 1, y - 6, 14, 20, '#9aa3bd'); R(x + 3, y - 2, 10, 1, '#5b6278'); R(x + 3, y + 5, 10, 1, '#5b6278'); break;
+      case 'boxes': box(x + 1, y + 2, 14, 12, '#c99a63'); box(x + 3, y - 6, 10, 9, '#d8ad75'); break;
+    }
+  }
+
+  function drawChar(ch, t, working) {
+    const L = LOOK[ch.role], x = Math.round(ch.x), y = Math.round(ch.y);
+    const fr = ch.walking ? Math.floor(t * 8) % 2 : 0, bob = working && !ch.walking ? Math.floor(t * 3) % 2 : 0;
+    R(x + 3, y + 13, 10, 3, 'rgba(0,0,0,0.22)');                            // เงา
+    // ขา
+    R(x + 5, y + 8, 2, 6 - (fr ? 1 : 0), '#3a3350'); R(x + 9, y + 8, 2, 6 - (fr ? 0 : 1), '#3a3350');
+    // ตัว
+    box(x + 3, y + 1 - bob, 10, 8, L.shirt);
+    if (L.acc === 'tie' && ch.dir === 'down') R(x + 7, y + 2 - bob, 2, 5, '#f2c94c');
+    // แขน
+    const sw = ch.walking ? (fr ? 1 : -1) : 0;
+    R(x + 2, y + 2 - bob + sw, 2, 5, L.shirt); R(x + 12, y + 2 - bob - sw, 2, 5, L.shirt);
+    R(x + 2, y + 6 - bob + sw, 2, 2, '#f6c9a2'); R(x + 12, y + 6 - bob - sw, 2, 2, '#f6c9a2');
+    // หัว
+    const hy = y - 10 - bob;
+    box(x + 2, hy, 12, 11, '#f6c9a2');
+    R(x + 2, hy, 12, 4, L.hair); R(x + 1, hy + 1, 1, 5, L.hair); R(x + 14, hy + 1, 1, 5, L.hair);
+    if (L.style === 'long') { R(x + 1, hy + 2, 2, 9, L.hair); R(x + 13, hy + 2, 2, 9, L.hair); }
+    if (L.style === 'bun') R(x + 6, hy - 3, 4, 3, L.hair);
+    if (L.style === 'spiky') { R(x + 3, hy - 2, 2, 2, L.hair); R(x + 7, hy - 3, 2, 3, L.hair); R(x + 11, hy - 2, 2, 2, L.hair); }
+    if (L.style === 'cap') { R(x + 2, hy - 1, 12, 4, '#2f6fdf'); R(x + 10, hy + 2, 6, 2, '#2f6fdf'); }
+    if (ch.dir === 'up') R(x + 2, hy, 12, 9, L.hair);
+    else if (ch.dir === 'down') { R(x + 5, hy + 5, 1, 2, O); R(x + 10, hy + 5, 1, 2, O); R(x + 4, hy + 8, 2, 1, 'rgba(240,120,130,0.6)'); R(x + 10, hy + 8, 2, 1, 'rgba(240,120,130,0.6)'); if (L.acc === 'glasses') { R(x + 4, hy + 4, 3, 1, O); R(x + 9, hy + 4, 3, 1, O); } }
+    else { const ex = ch.dir === 'right' ? x + 10 : x + 5; R(ex, hy + 5, 1, 2, O); R(ch.dir === 'right' ? x + 2 : x + 9, hy + 1, 5, 6, L.hair); }
+    if (L.acc === 'phones') { R(x + 1, hy + 4, 2, 4, '#2b3045'); R(x + 13, hy + 4, 2, 4, '#2b3045'); R(x + 3, hy - 1, 10, 1, '#2b3045'); }
+    if (ch.walking) { box(x + 13, y + 3, 6, 7, '#ffffff', '#5b6278'); R(x + 14, y + 5, 4, 1, '#9aa3bd'); } // ถือแฟ้มงาน
     if (working && !ch.walking) { // บอลลูนกำลังทำงาน
       const k = Math.floor(t * 2) % 3;
-      px(x + 1, y - 7, 9, 5, '#ffffff'); for (let d = 0; d < 3; d++) px(x + 2 + d * 3, y - 5, 1, 1, d === k ? css('--accent') : '#9aa3bd');
+      box(x + 1, hy - 11, 14, 8, '#ffffff'); R(x + 6, hy - 4, 3, 2, '#ffffff');
+      for (let d = 0; d < 3; d++) R(x + 4 + d * 3, hy - 8, 2, 2, d === k ? '#2f6fdf' : '#b4bbcc');
     }
   }
+
   let last = performance.now();
   function frame(now) {
     const dt = Math.min(0.05, (now - last) / 1000), t = now / 1000; last = now;
     step(dt);
-    g.clearRect(0, 0, cv.width, cv.height);
-    const activeRole = S.job && S.job.status !== 'done' ? S.job.role : null;
-    ROOMS.forEach((r, i) => drawRoom(i, activeRole && ROLE_ROOM[activeRole] === r[0], t));
-    const seated = Object.values(chars).filter((c) => !c.walking), walkers = Object.values(chars).filter((c) => c.walking);
-    seated.forEach((ch) => drawPerson(ch, t, ch.role === activeRole));
-    ROOMS.forEach((r, i) => drawDesk(i, activeRole && ROLE_ROOM[activeRole] === r[0], t));
-    walkers.forEach((ch) => drawPerson(ch, t, false));
+    const active = S.job && S.job.status !== 'done' ? S.job.role : null, activeRoom = active ? ROLE_ROOM[active] : null;
+    R(0, 0, cv.width, cv.height, '#2a2236');
+    ROOMS.forEach((_, i) => { drawFloor(i); drawWall(i); });
+    // วาดเรียงตามความลึก (ล่างทับบน)
+    const items = F.map((f) => ({ y: f.type === 'rug' ? -1 : f.y + f.h * T, f }))
+      .concat(Object.values(chars).map((ch) => ({ y: ch.y + T + 0.5, ch })));
+    items.sort((a, b) => a.y - b.y);
+    for (const it of items) {
+      if (it.f) sprite(it.f, t, it.f.room === activeRoom);
+      else drawChar(it.ch, t, it.ch.role === active);
+    }
+    if (activeRoom) { // ไฮไลต์ห้องที่ทำงานอยู่
+      const { c, r } = org(ridx(activeRoom)), a = 0.55 + 0.25 * Math.sin(t * 3);
+      g.strokeStyle = `rgba(255,214,90,${a})`; g.lineWidth = 2; g.strokeRect(c * T + 2, r * T + 2, RC * T - 4, RR * T - 4);
+    }
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
@@ -341,6 +480,6 @@ nav.tabs button[aria-selected="true"] { color: var(--accent); background: var(--
 
   // สำหรับทดสอบ
   window.__office = { charRoom: (role) => chars[role] && !chars[role].path.length ? roomOf(chars[role]) : null, activeRoom: () => (S.job ? ROLE_ROOM[S.job.role] : null) };
-  function roomOf(ch) { const col = Math.min(2, Math.floor(ch.x / RW)), row = Math.min(2, Math.floor(ch.y / RH)); return ROOMS[row * 3 + col][0]; }
+  function roomOf(ch) { const col = Math.min(2, Math.floor(ch.x / T / RC)), row = Math.min(2, Math.floor(ch.y / T / RR)); return ROOMS[row * 3 + col][0]; }
 })();
 </script>
