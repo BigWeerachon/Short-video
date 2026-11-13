@@ -1,7 +1,10 @@
 # ออฟฟิศพิกเซล (Artifact)
 
 - URL: https://claude.ai/artifact/RtbKxpcQYLqzEgKCsFgWuy (เปิดในแอป Claude บนมือถือได้)
-- ไฟล์: `office/index.html` — แก้แล้วเผยแพร่ด้วย Artifact tool (`file_path` = ไฟล์นี้, `url` = ด้านบน, ไม่ต้องส่ง capabilities เพื่อคงค่าเดิม)
+- ซอร์ส: `office/index.html` (การ์ด/แท็บ/ข้อมูล) + `office/world/` (แผนที่และตัวละครจากโปรเจกต์ fst-pixel-game)
+- สร้างไฟล์เผยแพร่: `node scripts/build_office.mjs` → `office/office.html` แล้วเผยแพร่ด้วย Artifact tool (`file_path` = office/office.html, `url` = ด้านบน)
+- แผนที่: ห้องผู้อำนวยการ · ห้องประชุม · ห้องตัดต่อ & เสียง · โถงทำงาน — พนักงาน 10 ตำแหน่งนั่งประจำที่
+- เมื่อ `jobs.role` เปลี่ยน: คนเดิมลุกถือแฟ้มเดินไปส่งโต๊ะคนถัดไปแล้วเดินกลับ · คนที่กำลังทำมีบอลลูน "…" และป้ายห้องเป็นสีโลโก้
 - capability: `db` กฎ `{path:"", read:"view", write:"admin"}` → ทุกคนที่เปิดได้อ่าน, เขียนได้เฉพาะเจ้าของ/Editor (และ Claude ผ่าน ArtifactData)
 
 ## โครงข้อมูล (db)

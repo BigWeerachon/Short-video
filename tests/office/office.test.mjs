@@ -1,7 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
+import { execFileSync } from 'node:child_process';
 import { startServer } from '../../engine/render/browser.mjs';
+
+execFileSync('node', ['scripts/build_office.mjs']);
 
 const require = createRequire(import.meta.url);
 
@@ -22,7 +25,7 @@ async function open(seed) {
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   await page.addInitScript(fakeDb, seed);
-  await page.goto(`http://127.0.0.1:${port}/office/index.html`);
+  await page.goto(`http://127.0.0.1:${port}/office/office.html`);
   await page.waitForTimeout(300);
   return { page, close: async () => { await browser.close(); server.close(); } };
 }
@@ -46,8 +49,8 @@ test('job handoff: active room follows role and characters return home', async (
   try {
     await page.waitForTimeout(3000);
     assert.equal(await page.evaluate(() => window.__office.activeRoom()), 'animator');
-    assert.equal(await page.evaluate(() => window.__office.charRoom('animator')), 'animator');
-    assert.equal(await page.locator('#rooms span.on').textContent(), 'แอนิเมชัน');
+    assert.equal(await page.evaluate(() => window.__game.activeId), 'animator');
+    assert.equal(await page.locator('.office .room.on').textContent(), 'โถงทำงาน');
     assert.match(await page.textContent('#jobCard'), /50%/);
   } finally { await close(); }
 });
