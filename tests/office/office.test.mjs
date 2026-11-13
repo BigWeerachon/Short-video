@@ -58,7 +58,8 @@ test('library copy button copies the platform caption', async () => {
   try {
     await page.getByRole('tab', { name: 'คลังงาน' }).click();
     await page.waitForTimeout(150);
-    await page.locator('details summary').click();
+    await page.locator('[data-toggle]').click();
+    await page.locator('[data-seg="tiktok"]').click();
     await page.locator('button.copy[data-p="tiktok"]').click();
     assert.equal(await page.evaluate(() => window.__copied), 'ติ๊กต็อก paakin.com\n\n#ผี');
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
