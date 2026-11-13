@@ -226,8 +226,12 @@ export default function (S) {
   shot(T(40), (ctx, lt, t) => {
     studio(ctx, t); narr(ctx, { x: 540, y: 1620, scale: 1.4, expr: t > T(42) ? 'sad' : 'scared', arms: { l: 'cheek', r: 'cheek' } }); deskF(ctx);
     const pk = on(t, TW(42, 'พัง'), 0.35);
-    if (pk < 1) thoughtBubble(ctx, { x: 540, y: 640, r: 330 * (1 + pk * 0.3), k: on(t, TW(40, 'ไรเดอร์'), 0.4) * (1 - pk), tailX: 540, tailY: 1060 }, (c) => {
-      roadNight(c, { t, scroll: t * 500 }); // ใช้พิกัดเต็มฉาก → ย่อ
+    if (pk < 1) thoughtBubble(ctx, { x: 540, y: 640, r: 330 * (1 + pk * 0.3), k: on(t, TW(40, 'ไรเดอร์'), 0.4) * (1 - pk), tailX: 540, tailY: 1060 }, (c, rr) => {
+      // ฉากเต็มจอ (1080×1920) ย่อให้คลุมเต็มวงกลม: ความกว้างเท่าเส้นผ่านศูนย์กลาง จัดกึ่งกลางที่ระดับถนน
+      const s = (2 * rr) / 1080;
+      c.save(); c.scale(s, s); c.translate(-540, -1250);
+      roadNight(c, { t, scroll: t * 500 });
+      c.restore();
     });
     if (pk < 1 && t > TW(40, 'ไรเดอร์')) {
       ctx.save(); ctx.translate(540, 640); ctx.scale(1 - pk, 1 - pk);
