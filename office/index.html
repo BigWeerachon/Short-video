@@ -97,6 +97,11 @@ button:focus-visible, .chip:focus-visible { outline: 3px solid color-mix(in srgb
 .cap pre { margin: 0; white-space: pre-wrap; word-break: break-word; font-family: var(--font-body); font-size: 13.5px; line-height: 1.55; background: var(--bg); border-radius: 10px; padding: 10px 12px; max-height: 132px; overflow: auto; }
 .postrow { display: grid; grid-template-columns: 1fr 44px; gap: 8px; }
 a.go { padding: 11px 12px; border-radius: 11px; font-size: 14.5px; }
+a.go svg { width: 20px; height: 20px; flex: none; }
+a.go-youtube { background: #ff0000; color: #fff; }
+a.go-facebook { background: #1877f2; color: #fff; }
+a.go-tiktok { background: #000000; color: #fff; box-shadow: inset 0 0 0 1px #3a3a3a; }
+a.go-instagram { background: linear-gradient(45deg, #f58529, #dd2a7b 45%, #8134af 75%, #515bd4); color: #fff; }
 button.mark { padding: 0; border-radius: 11px; font-size: 16px; font-weight: 700; }
 button.mark.on { background: color-mix(in srgb, var(--accent-2) 18%, var(--bg)); }
 button.dl { width: 36px; height: 36px; padding: 0; justify-content: center; border-radius: 10px; }
@@ -238,7 +243,13 @@ nav.tabs button[aria-selected="true"] { color: #ffffff; background: #0a6fc9; }
   // หน้าอัปโหลดของแต่ละแพลตฟอร์ม (แนบไฟล์/แคปชั่นผ่านลิงก์ไม่ได้ — แพลตฟอร์มไม่อนุญาต)
   const UPLOAD = { youtube: 'https://www.youtube.com/upload', facebook: 'https://business.facebook.com/latest/reels_composer',
     tiktok: 'https://www.tiktok.com/tiktokstudio/upload', instagram: 'https://business.facebook.com/latest/reels_composer' };
-  const GO_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 17L17 7M9 7h8v8"/></svg>';
+  // โลโก้แพลตฟอร์ม (วาดแบบเรียบง่ายด้วย SVG ไม่โหลดจากภายนอก)
+  const LOGO = {
+    youtube: '<svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="4" fill="#fff"/><path d="M10 9l5 3-5 3z" fill="#ff0000"/></svg>',
+    facebook: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#fff"/><path d="M13.2 21v-6.6h2.2l.4-2.6h-2.6v-1.7c0-.8.3-1.3 1.4-1.3h1.3V6.5c-.3 0-1-.1-2-.1-2.1 0-3.4 1.2-3.4 3.4v2h-2.2v2.6h2.2V21z" fill="#1877f2"/></svg>',
+    tiktok: '<svg viewBox="0 0 24 24"><path d="M15.6 3c.4 2.2 1.8 3.6 4 3.8v3c-1.5 0-2.8-.4-4-1.2v6.1c0 3.3-2.5 5.5-5.6 5.5-3 0-5.4-2.4-5.4-5.4 0-3.3 2.9-5.8 6.3-5.3v3.1c-1.6-.4-3.2.6-3.2 2.2 0 1.3 1 2.3 2.3 2.3 1.4 0 2.5-1 2.5-2.7V3z" fill="#25f4ee" transform="translate(-.8,-.6)"/><path d="M15.6 3c.4 2.2 1.8 3.6 4 3.8v3c-1.5 0-2.8-.4-4-1.2v6.1c0 3.3-2.5 5.5-5.6 5.5-3 0-5.4-2.4-5.4-5.4 0-3.3 2.9-5.8 6.3-5.3v3.1c-1.6-.4-3.2.6-3.2 2.2 0 1.3 1 2.3 2.3 2.3 1.4 0 2.5-1 2.5-2.7V3z" fill="#fe2c55" transform="translate(.8,.6)"/><path d="M15.6 3c.4 2.2 1.8 3.6 4 3.8v3c-1.5 0-2.8-.4-4-1.2v6.1c0 3.3-2.5 5.5-5.6 5.5-3 0-5.4-2.4-5.4-5.4 0-3.3 2.9-5.8 6.3-5.3v3.1c-1.6-.4-3.2.6-3.2 2.2 0 1.3 1 2.3 2.3 2.3 1.4 0 2.5-1 2.5-2.7V3z" fill="#fff"/></svg>',
+    instagram: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1" fill="#fff" stroke="none"/></svg>',
+  };
   const DL_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>';
   const HOW = { youtube: 'วางแคปชั่น: บรรทัดแรกเป็นชื่อ ที่เหลือเป็นคำอธิบาย', instagram: 'เลือก "แชร์ไปที่ Instagram" ในหน้าสร้าง Reels', facebook: 'เลือกเพจ PAAKIN ก่อนโพสต์', tiktok: 'วางแคปชั่นในช่องคำอธิบาย' };
   function renderChips() {
@@ -269,7 +280,7 @@ nav.tabs button[aria-selected="true"] { color: #ffffff; background: #0a6fc9; }
       const panel = sel ? `<div class="cap">
           <pre>${esc(captionText(sel, e.captions[sel]))}</pre>
           <div class="postrow">
-            <a class="go" href="${UPLOAD[sel]}" target="_blank" rel="noopener" data-id="${id}" data-p="${sel}">${GO_SVG}<span>คัดลอก + เปิด ${PLAT_TH[sel]}</span></a>
+            <a class="go go-${sel}" href="${UPLOAD[sel]}" target="_blank" rel="noopener" data-id="${id}" data-p="${sel}">${LOGO[sel]}<span>คัดลอก + เปิด ${PLAT_TH[sel]}</span></a>
             <button class="mark ${posted[sel] ? 'on' : ''}" data-mark="${sel}" data-id="${id}" aria-pressed="${!!posted[sel]}" title="ทำเครื่องหมายว่าโพสต์แล้ว">✓</button>
           </div>
         </div>` : '';
