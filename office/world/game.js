@@ -209,26 +209,81 @@
     const mid = path({ c: a.c, r: a.r }, { c: b.c, r: b.r }) || [{ x: b.x, y: b.y }];
     return [{ x: a.x, y: a.y }, ...mid];
   }
-  function setRole(role, active = true) {
+  // ขั้นตอนของพนักงาน: เดินไปจุดหนึ่ง → ทำอะไรสักอย่าง → เดินกลับที่นั่ง
+  const SPOTS = { cooler: { x: 316, y: 186 }, printer: { x: 258, y: 156 }, coffee: { x: 300, y: 164 }, meetA: { x: 160, y: 104 }, meetB: { x: 192, y: 104 } };
+  const CHAT = ['กาแฟหน่อย ☕', 'ไอเดียใหม่!', 'ช็อตนี้สวยมาก', 'ประชุมกี่โมง?', 'บทใหม่มาแล้ว', 'พักสายตาแป๊บ', 'ซับไม่ล้นแล้วนะ', 'ลูกค้าชอบแน่', 'เพลงนี้ติดหู', 'ส่งไฟล์ให้แล้ว'];
+  const REPLY = ['เยี่ยมเลย!', 'โอเค!', 'จริงด้วย', 'เดี๋ยวดูให้', '555', 'ได้เลย'];
+  const pick = (a) => a[Math.floor(Math.random() * a.length)];
+  const idle = (p) => !p.route && !p.plan && p.id !== activeId;
+  function speak(p, text, dur) { p.speech = { text, until: performance.now() + dur * 1000 }; }
+  function goTo(p, pt, then) { p.route = [...staffRoute(p, pt), { x: pt.x, y: pt.y }]; p.then = then; p.plan = true; }
+  function goHome(p) { p.carry = false; goTo(p, p.seat, () => { p.x = p.seat.x; p.y = p.seat.y; p.dir = p.seat.dir; p.flip = false; p.plan = null; }); }
+  function waitThen(p, sec, fn) { p.pause = sec; p.afterPause = fn; }
+
+  // (ข) ส่งงานต่อ = สองคนเดินไปเจอกันที่ห้องประชุม คุยตามโน้ตส่งงานจริง แล้วแยกย้าย
+  let note = '';
+  function setRole(role, active = true, handoffNote = '') {
     const id = active ? ROLE_TO_STAFF[role] || null : null;
+    if (handoffNote) note = handoffNote;
     if (id && activeId && id !== activeId) {
       const from = STAFF.find((s) => s.id === activeId), to = STAFF.find((s) => s.id === id);
-      if (from && to && !from.route) { from.route = staffRoute(from, to.seat); from.back = false; from.carry = true; }
+      if (from && to) meet(from, to, note || 'ส่งงานต่อนะ', 'รับทราบ! เริ่มเลย');
     }
     activeId = id;
   }
+  function meet(a, b, lineA, lineB) {
+    for (const p of [a, b]) { p.route = null; p.pause = 0; p.afterPause = null; p.then = null; }
+    let arrived = 0;
+    const talk = () => {
+      if (++arrived < 2) return;
+      a.dir = 'side'; a.flip = false; b.dir = 'side'; b.flip = true;
+      speak(a, lineA, 3.2);
+      waitThen(a, 3.4, () => { speak(b, lineB, 2.2); waitThen(b, 2.4, () => { goHome(a); goHome(b); }); });
+    };
+    a.carry = true;
+    goTo(a, SPOTS.meetA, talk); goTo(b, SPOTS.meetB, talk);
+  }
+
+  // (ก) ชีวิตประจำวัน: สุ่มคนว่างลุกไปตู้น้ำ/กาแฟ/เครื่องพิมพ์ หรือเดินไปคุยโต๊ะเพื่อน
+  let ambientIn = 3;
+  function ambient() {
+    const free = STAFF.filter(idle);
+    if (free.length < 2 || STAFF.filter((p) => p.plan).length >= 3) return;
+    const p = pick(free);
+    if (Math.random() < 0.45) {
+      const q = pick(free.filter((x) => x !== p));
+      const near = { x: q.seat.x + (q.seat.dir === 'up' ? 0 : 14), y: q.seat.y + (q.seat.dir === 'up' ? 14 : 16) };
+      goTo(p, near, () => { p.dir = 'up'; speak(p, pick(CHAT), 2.6); waitThen(p, 2.8, () => { speak(q, pick(REPLY), 1.8); waitThen(p, 2.0, () => goHome(p)); }); });
+    } else {
+      const [spot, line] = pick([[SPOTS.cooler, 'น้ำเย็นชื่นใจ'], [SPOTS.coffee, 'กาแฟหน่อย ☕'], [SPOTS.printer, 'ปริ้นต์สคริปต์']]);
+      goTo(p, spot, () => { p.dir = 'up'; speak(p, line, 2.2); waitThen(p, 2.6, () => goHome(p)); });
+    }
+  }
   function updateStaff(dt) {
+    ambientIn -= dt;
+    if (ambientIn <= 0) { ambient(); ambientIn = 5 + Math.random() * 7; }
     for (const p of STAFF) {
-      if (p.pause > 0) { p.pause -= dt; if (p.pause <= 0) { p.route = [...staffRoute(p, p.seat), { x: p.seat.x, y: p.seat.y }]; p.back = true; p.carry = false; } continue; }
+      if (p.pause > 0) { p.pause -= dt; p.walking = false; if (p.pause <= 0 && p.afterPause) { const f = p.afterPause; p.afterPause = null; f(); } continue; }
       if (!p.route) continue;
-      if (!p.route.length) {
-        p.route = null; p.walking = false;
-        if (p.back) { p.x = p.seat.x; p.y = p.seat.y; p.dir = p.seat.dir; p.flip = false; } else { p.pause = 1.6; p.dir = 'up'; }
-        continue;
-      }
+      if (!p.route.length) { p.route = null; p.walking = false; const f = p.then; p.then = null; if (f) f(); continue; }
       const q = p.route[0], dx = q.x - p.x, dy = q.y - p.y, d = Math.hypot(dx, dy), v = 40 * dt;
       p.walking = true; face(p, dx, dy); p.t += dt; p.f = Math.floor(p.t * 8) % 4;
       if (d <= v) { p.x = q.x; p.y = q.y; p.route.shift(); } else { p.x += dx / d * v; p.y += dy / d * v; }
+    }
+  }
+  // บอลลูนคำพูด (HTML ให้อ่านภาษาไทยได้คมชัด)
+  const sayEls = new Map();
+  function placeSpeech() {
+    const host = studio ? cv.parentElement : document.body, now = performance.now();
+    for (const p of STAFF) {
+      let el = sayEls.get(p.id);
+      const on = p.speech && p.speech.until > now;
+      if (!on) { if (el) el.hidden = true; continue; }
+      if (!el) { el = document.createElement('div'); el.className = 'say'; host.appendChild(el); sayEls.set(p.id, el); }
+      el.hidden = false; el.textContent = p.speech.text;
+      const x = p.x, y = p.y - 30;
+      if (studio) { el.style.left = (x / MW * 100) + '%'; el.style.top = (y / MH * 100) + '%'; }
+      else { el.style.left = (x - Math.round(cam.x)) * view.scale + 'px'; el.style.top = (y - Math.round(cam.y)) * view.scale + 'px'; }
     }
   }
   function bubble(x, y, time) {
@@ -265,6 +320,7 @@
   function render(time) {
     if (studio) { cam.x = 0; cam.y = 0; placeLabels(); }
     else renderCam();
+    placeSpeech();
     drawWorld(time);
   }
   function renderCam() {
@@ -301,7 +357,7 @@
       if (it.n) { draw(it.n, it.x, it.py); continue; }
       if (it.p) {
         const p = it.p;
-        if (p.walking || p.pause > 0) {
+        if (p.walking || p.pause > 0 || p.plan) {
           const n = `staff_${p.id}_${p.dir}_${p.walking ? p.f : 0}`, fm = fr(n);
           ctx.fillStyle = 'rgba(0,0,0,0.22)'; ctx.beginPath(); ctx.ellipse(Math.round(p.x), Math.round(p.y) - 1, 6, 2.5, 0, 0, Math.PI * 2); ctx.fill();
           draw(n, p.x - fm.w / 2, p.y - fm.h + 1, p.flip);
@@ -347,6 +403,6 @@
     let last = performance.now();
     const loop = (now) => { const dt = Math.min(0.05, (now - last) / 1000); last = now; update(dt); render(now); requestAnimationFrame(loop); };
     requestAnimationFrame(loop);
-    window.__game = { hero, maid, STAFF, solids, blocked: (e) => !!blocked(e, e.x, e.y), say, keys, setRole, get activeId() { return activeId; } };
+    window.__game = { ambientNow: () => ambient(), hero, maid, STAFF, solids, blocked: (e) => !!blocked(e, e.x, e.y), say, keys, setRole, get activeId() { return activeId; } };
   };
 })();
