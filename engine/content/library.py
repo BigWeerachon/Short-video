@@ -36,6 +36,8 @@ def add(entry: dict, mp4=None, mp4_ref=None, captions=None) -> str:
     status = entry.get("status", "draft")
     if status not in STATUSES:
         raise ValueError(f"status ต้องเป็น {STATUSES}")
+    if mp4 and pathlib.Path(mp4).stat().st_size > MAX_ASSET and not mp4_ref:
+        mp4_ref = "ไฟล์ใหญ่เกิน 15MB — ส่งให้ผู้ใช้ในแชทแล้ว ไม่ได้เก็บในคลัง"
     now = dt.datetime.now()
     items = _load()
     n = sum(1 for e in items if e["id"].startswith(now.strftime("%Y%m%d"))) + 1
@@ -48,8 +50,6 @@ def add(entry: dict, mp4=None, mp4_ref=None, captions=None) -> str:
         if mp4.stat().st_size <= MAX_ASSET:
             dst = folder / "clip.mp4"; shutil.copy(mp4, dst)
             files["mp4"] = str(dst.relative_to(ROOT))
-        elif not mp4_ref:
-            raise ValueError("ไฟล์ใหญ่เกิน 15MB ต้องระบุ mp4_ref (เช่น ส่งในแชทไหน)")
     if captions:
         dst = folder / "captions.json"; shutil.copy(captions, dst)
         files["captions"] = str(dst.relative_to(ROOT))
@@ -94,7 +94,8 @@ def main(argv):
     cmd = argv[1] if len(argv) > 1 else ""
     if cmd == "add":
         spec = json.loads(open(argv[2], encoding="utf-8").read())
-        print(add(spec["entry"], spec.get("mp4"), spec.get("mp4_ref"), spec.get("captions")))
+        entry = spec.get("entry", spec)  # รับทั้ง {"entry":{...},"mp4":...} และ entry แบบแบน
+        print(add(entry, spec.get("mp4"), spec.get("mp4_ref"), spec.get("captions")))
     elif cmd == "status":
         plat = argv[argv.index("--platform") + 1] if "--platform" in argv else None
         print(json.dumps(set_status(argv[2], argv[3], plat), ensure_ascii=False))

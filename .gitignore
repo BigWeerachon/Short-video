@@ -6,3 +6,4 @@ test-results/
 jobs/*/frames/
 jobs/*/out.mp4
 library/**/*.mp4
+jobs/_test*/

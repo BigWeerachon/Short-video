@@ -49,3 +49,19 @@ def test_large_mp4_not_committed(root, tmp_path):
     small = tmp_path / "s.mp4"; small.write_bytes(b"x" * 1000)
     b = lib.add(entry(title="สั้น"), mp4=small)
     assert lib.query(id=b)[0]["files"]["mp4"].endswith(".mp4")
+
+
+def test_large_mp4_without_ref_does_not_fail(root, tmp_path):
+    big = tmp_path / "big.mp4"
+    with open(big, "wb") as f:
+        f.truncate(16 * 1024 * 1024)
+    a = lib.add(entry(), mp4=big)
+    e = lib.query(id=a)[0]
+    assert e["files"]["mp4"] is None and e["files"]["mp4_ref"]
+
+
+def test_cli_accepts_flat_entry(root, tmp_path):
+    import sys
+    f = tmp_path / "e.json"; f.write_text(json.dumps(entry(), ensure_ascii=False), encoding="utf-8")
+    assert lib.main(["x", "add", str(f)]) == 0
+    assert lib.query(type="story_clip")

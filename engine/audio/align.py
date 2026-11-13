@@ -57,6 +57,8 @@ def _place(phrases, group_chunks):
 
 
 def align(phrases, chunks, sil_penalty=1.0) -> list:
+    if not chunks or sum(e - s for s, e in chunks) <= 0:
+        raise ValueError("ไม่พบช่วงพูดในไฟล์เสียง — ลองปรับ --noise-db (เช่น -30) หรือตรวจว่าไฟล์มีเสียงพูด")
     n, m = len(phrases), len(chunks)
     rate = sum(map(len, phrases)) / sum(e - s for s, e in chunks)
     INF = float("inf")
@@ -69,7 +71,7 @@ def align(phrases, chunks, sil_penalty=1.0) -> list:
             if c0 == INF:
                 continue
             if j < m:  # ข้าม chunk (เสียงไอ/รบกวน)
-                c = c0 + 2.0 * (chunks[j][1] - chunks[j][0]) + 0.5
+                c = c0 + 1.0 * (chunks[j][1] - chunks[j][0]) + 0.3
                 if c < dp[i][j + 1]:
                     dp[i][j + 1], bp[i][j + 1] = c, (i, j, False)
             for di in range(1, min(MAX_PH, n - i) + 1):
@@ -78,9 +80,11 @@ def align(phrases, chunks, sil_penalty=1.0) -> list:
                     grp = chunks[j:j + dj]
                     sp = sum(e - s for s, e in grp)
                     gap = sum(b[0] - a[1] for a, b in zip(grp, grp[1:]))
-                    c = c0 + abs(chars / rate - sp) + sil_penalty * gap * (dj - 1) / max(di, 1)
+                    c = c0 + abs(chars / rate - sp) + sil_penalty * gap
                     if c < dp[i + di][j + dj]:
                         dp[i + di][j + dj], bp[i + di][j + dj] = c, (i, j, True)
+    if bp[n][m] is None:  # วลีมากกว่าช่วงพูดมาก (เสียงพื้นดัง/ไม่มีช่วงหยุด) → แบ่งตามสัดส่วนตัวอักษร
+        return _place(phrases, chunks)
     i, j, groups = n, m, []
     while (i, j) != (0, 0):
         pi, pj, real = bp[i][j]

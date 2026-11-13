@@ -21,6 +21,6 @@ description: สร้างคลิป — ผลิตคลิปเล่�
    ไม่ผ่าน → animator แก้เฉพาะช็อตที่ระบุ (สูงสุด 2 รอบ) → ยังไม่ผ่าน director ตัดสิน/ถามผู้ใช้
 8. **editor** — `node engine/render/export.mjs <id>` (รันเบื้องหลัง) → ตรวจ ffprobe → ส่ง `out.mp4` ให้ผู้ใช้ (SendUserFile)
 9. **marketer** — `captions.json` 4 แพลตฟอร์ม → `python -m engine.content.captions validate jobs/<id>/captions.json`
-10. **librarian** — `python -m engine.content.library add` (สถานะ `ready`) + batch ออฟฟิศ (job done + library + report)
+10. **librarian** — `python -m engine.content.library add jobs/<id>/library.json` — ไฟล์ = `{"entry": {"title","type","series","characters","mood","paakin_feature","status"}, "mp4": "jobs/<id>/out.mp4", "captions": "jobs/<id>/captions.json"}` (mp4 >15MB ระบบใส่ mp4_ref ให้เอง หรือระบุ `"mp4_ref"` เอง) (สถานะ `ready`) + batch ออฟฟิศ (job done + library + report)
 11. **director → report** — `report.md` ส่งผู้ใช้: ไฟล์, timeline จริง, token เทียบงบ, บทเรียนใหม่, สิ่งที่ผู้ใช้ต้องทำ (กดโพสต์ 4 แพลตฟอร์ม แล้วบอก `/report posted <id> <platform>`)
 - commit + push งาน (ไม่รวม mp4) ทุกครั้งที่จบงาน

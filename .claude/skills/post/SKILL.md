@@ -10,5 +10,5 @@ description: โพสต์ทั่วไป — สร้างโพสต�
    - text: hook บรรทัดแรก, เนื้อหาสั้น อ่านง่ายบนมือถือ, CTA + www.paakin.com
    - image_brief: ภาพที่ควรใช้ (ขนาด 1080×1350), ข้อความบนภาพ ≤ 8 คำ
 3. ตรวจ `python -m engine.content.captions validate-post posts/<...>/post.json`
-4. **librarian** `python -m engine.content.library add` (type = promo/news/event) + set `library/<id>` ในออฟฟิศ
+4. **librarian** `python -m engine.content.library add posts/<...>/library.json` = `{"entry": {"title","type": promo|news|event,"status": "ready"}}` + set `library/<id>` ในออฟฟิศ
 5. ส่งผู้ใช้: ข้อความพร้อมคัดลอก + image_brief · ถามว่าจะให้ gen ใหม่/ปรับโทนไหม

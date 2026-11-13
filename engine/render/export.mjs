@@ -1,6 +1,6 @@
 // Export MP4: วนเฟรม 30fps → JPEG → ffmpeg image2pipe + mix.mp3 (คู่มือขั้นที่ 8)
 // ใช้: node engine/render/export.mjs <jobId> [--seconds N] [--remux]
-import { spawn } from 'node:child_process';
+import { spawn, execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { openJob, ROOT } from './browser.mjs';
@@ -42,6 +42,9 @@ export async function remux(jobId) {
   const dir = path.join(ROOT, 'jobs', jobId);
   const out = path.join(dir, 'out.mp4'), tmp = path.join(dir, 'out.remux.mp4');
   if (!fs.existsSync(out)) throw new Error('ยังไม่มี out.mp4 — export ก่อน');
+  const dur = (f) => Number(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', f]).toString());
+  const dv = dur(out), da = dur(path.join(dir, 'mix.mp3'));
+  if (Math.abs(dv - da) > 0.15) throw new Error(`ความยาวเสียงใหม่ (${da.toFixed(2)} วิ) ไม่เท่าภาพเดิม (${dv.toFixed(2)} วิ) — remux ไม่ได้ ต้อง export ใหม่ทั้งคลิป`);
   await new Promise((ok, bad) => {
     const p = spawn('ffmpeg', ['-v', 'error', '-y', '-i', out, '-i', path.join(dir, 'mix.mp3'), '-map', '0:v', '-map', '1:a',
       '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-shortest', '-movflags', '+faststart', tmp], { stdio: 'inherit' });

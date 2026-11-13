@@ -8,7 +8,7 @@ description: แก้คลิป — แก้คลิปที่ทำแ�
 1. **librarian** บันทึกคำติเป็นบทเรียนก่อนเสมอ (`/remember`) ถ้าเป็นเรื่องที่อาจเกิดซ้ำ
 2. **director** จัดประเภทคำติ แล้วส่งให้ตำแหน่งเดียวที่รับผิดชอบ:
    - เวลาไม่ตรงเสียง → **sound** align ใหม่ (ปรับ `--sil-penalty`) แล้ว animator ตรวจ `T(i)` ที่ใช้
-   - เสียง/ดนตรี/SFX → **sound** แก้ `audio_plan.json` + mix → **editor** `node engine/render/export.mjs <id> --remux` (ไม่เรนเดอร์ภาพใหม่)
+   - เสียง/ดนตรี/SFX → **sound** แก้ `audio_plan.json` + mix → **editor** `node engine/render/export.mjs <id> --remux` (ไม่เรนเดอร์ภาพใหม่ — ใช้ได้เฉพาะเมื่อความยาวเสียงเท่าเดิม ถ้าเปลี่ยน VO/align ใหม่ ระบบจะปฏิเสธ → export ใหม่ทั้งคลิป)
    - ภาพ/ท่า/ข้อความ → **animator** แก้เฉพาะช็อตใน `shots.js` → **critic** ตรวจเฉพาะช่วงนั้น → **editor** export ใหม่
    - ปัญหาของ engine (เกิดได้ทุกคลิป) → **animator** แก้ใน `engine/web` พร้อมเทสต์ แล้วรัน `node --test tests/web/*.test.mjs`
 3. ส่งไฟล์ใหม่ให้ผู้ใช้ + สรุปสั้นว่าแก้อะไร · อัปเดตออฟฟิศ

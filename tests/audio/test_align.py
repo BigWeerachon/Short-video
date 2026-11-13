@@ -45,3 +45,25 @@ def test_envelope_range(make_audio):
     env = envelope(p)
     assert len(env) == math.ceil(1.5 * 30)
     assert all(0 <= v <= 9 for v in env) and max(env) >= 7
+
+
+def test_align_more_phrases_than_paths(make_audio):
+    import pytest
+    phrases = [f"วลีที่{i}ยาวพอประมาณ" for i in range(10)]
+    out = align(phrases, speech_chunks(make_audio([(0.2, 8.0)])))
+    assert [o["w"] for o in out] == phrases
+    assert all(a["e"] <= b["s"] + 1e-6 for a, b in zip(out, out[1:]))
+
+
+def test_align_silent_audio_clear_error():
+    import pytest
+    with pytest.raises(ValueError, match="noise-db"):
+        align(["ก"], [])
+
+
+def test_align_long_cough_in_gap(make_audio):
+    phrases = ["ประโยคแรกยาวพอสมควร", "ประโยคที่สองยาวพอกัน", "หลังหยุดยาวสามวินาที", "ประโยคสุดท้าย"]
+    spec = [(0.2, 1.6), (1.9, 3.3), (4.4, 5.3), (6.4, 7.8), (8.1, 9.0)]  # 0.9 s ไอในช่วงเงียบ
+    out = align(phrases, speech_chunks(make_audio(spec)))
+    assert abs(out[1]["s"] - 1.9) < 0.3 and out[1]["e"] < 4.0
+    assert abs(out[2]["s"] - 6.4) < 0.3

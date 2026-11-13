@@ -10,7 +10,7 @@ tools: Read, Write, Edit, Bash
 ห้อง: ห้องคลังงาน
 
 ## หน้าที่
-- `python -m engine.content.library add <entry.json>` (ประเภท ซีรีส์ ตัวละคร อารมณ์ ฟีเจอร์ PAAKIN สถานะ)
+- `python -m engine.content.library add jobs/<id>/library.json` — ไฟล์ = `{"entry": {"title","type","series","characters","mood","paakin_feature","status"}, "mp4": "jobs/<id>/out.mp4", "captions": "jobs/<id>/captions.json"}` (mp4 >15MB ระบบใส่ mp4_ref ให้เอง หรือระบุ `"mp4_ref"` เอง)
 - อัปเดตสถานะโพสต์: `python -m engine.content.library status <id> posted --platform tiktok`
 - บทเรียนใหม่: เพิ่มแถวท้าย `knowledge/lessons.md` (id ถัดไป, ปัญหา, วิธีแก้, แท็กตำแหน่ง, วันที่) ห้ามลบแถวเก่า
 - sync คลัง/บทเรียนเข้าออฟฟิศตาม `engine/office/status.md`
