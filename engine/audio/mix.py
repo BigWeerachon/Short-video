@@ -64,7 +64,20 @@ def main():
     root = pathlib.Path(__file__).resolve().parents[2]
     total = mix(d / p.get("vo", "vo.mp3"), root / p.get("end_voice", "assets/brand/end_voice_from_clip.mp3"),
                 p["music"], p.get("sfx", []), d / "mix.mp3", atempo=p.get("atempo", 1.0), mutes=p.get("mutes", []))
+    _write_durations(d, total, root / p.get("end_voice", "assets/brand/end_voice_from_clip.mp3"))
     print(f"mix.mp3 ยาว {total:.2f} วิ (รวมเสียงปิด)")
+
+
+def _write_durations(d, total, end_voice):
+    """บันทึก END_DUR ลง timing.js ให้ player รู้ว่าฉากปิดเริ่มเมื่อไร"""
+    from .io import duration
+    tj = d / "timing.js"
+    if not tj.exists():
+        return
+    end = duration(end_voice)
+    lines = [l for l in tj.read_text(encoding="utf-8").splitlines() if not l.startswith(("window.END_DUR", "window.VO_DUR"))]
+    lines += [f"window.VO_DUR={total - end:.3f};", f"window.END_DUR={end:.3f};"]
+    tj.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 if __name__ == "__main__":

@@ -112,7 +112,7 @@ def main():
     env = envelope(a.audio)
     dump(words, out / "words.json"); dump(env, out / "env.json")
     (out / "timing.js").write_text("window.WORDS=" + json.dumps(words, ensure_ascii=False) +
-                                   ";\nwindow.ENV=" + json.dumps(env) + ";\n", encoding="utf-8")
+                                   ";\nwindow.ENV=" + json.dumps(env) + f";\nwindow.VO_DUR={duration(a.audio):.3f};\n", encoding="utf-8")
     print(timing_table(words))
 
 

@@ -33,5 +33,5 @@
 
 ## คำสั่งตรวจ
 ```bash
-python -m pytest -q && node --test tests/web && python scripts/check_policy.py
+python -m pytest -q && node --test tests/web/*.test.mjs && python scripts/check_policy.py
 ```

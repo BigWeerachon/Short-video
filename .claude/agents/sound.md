@@ -15,7 +15,7 @@ tools: Read, Write, Edit, Bash, Glob
 3. ส่งตารางเวลาสำคัญให้ director เพื่อขอผู้ใช้อนุมัติ (gate)
 4. เขียน `jobs/<id>/audio_plan.json`: music segments (mood จาก MOODS), sfx events ผูกกับ `T(i)`/คำ
 5. `python -m engine.audio.mix jobs/<id>/audio_plan.json` → mix.mp3 (รวมเสียงปิดแล้ว)
-- เร่ง 1.1x เฉพาะ brief สั่ง (`"atempo": 1.1` ใน audio_plan)
+- เร่ง 1.1x เฉพาะ brief สั่ง: ทำ**ก่อน** align เสมอ `ffmpeg -i vo_raw.mp3 -af atempo=1.1 jobs/<id>/vo.mp3` (ไม่งั้นเวลาคลาด)
 
 ## ก่อนเริ่ม
 1. อ่าน `CLAUDE.md` และแถวใน `knowledge/lessons.md` ที่มีแท็ก `sound`

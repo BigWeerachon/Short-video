@@ -1,0 +1,16 @@
+{
+  "vo": "vo.mp3",
+  "music": [
+    {"mood": "cute", "start": 0, "end": 6.5},
+    {"mood": "spooky", "start": 6.5, "end": 12.6},
+    {"mood": "bright", "start": 12.6, "end": 21.3}
+  ],
+  "sfx": [
+    {"name": "boing", "t": 3.9},
+    {"name": "sting", "t": 7.6},
+    {"name": "click", "t": 10.6},
+    {"name": "chime", "t": 14.6},
+    {"name": "sparkle", "t": 16.2},
+    {"name": "fanfare", "t": 17.6}
+  ]
+}
