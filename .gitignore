@@ -1,0 +1,8 @@
+.superpowers/
+node_modules/
+__pycache__/
+.pytest_cache/
+test-results/
+jobs/*/frames/
+jobs/*/out.mp4
+library/**/*.mp4

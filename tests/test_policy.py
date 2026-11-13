@@ -1,0 +1,28 @@
+import sys, pathlib
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+from check_policy import load_agents, violations
+
+
+def a(**kw):
+    d = {"name": "x"}
+    d.update(kw)
+    return d
+
+
+def test_fable_forbidden():
+    assert violations([a(model="fable")])
+
+
+def test_opus_requires_low():
+    assert violations([a(model="opus")])
+    assert violations([a(model="opus", effort="medium")])
+
+
+def test_sonnet_ok():
+    assert violations([a(model="sonnet"), a(model="haiku"), a(model="opus", effort="low")]) == []
+
+
+def test_unknown_model():
+    assert violations([a(model="gpt")])
+    assert violations([a()])
