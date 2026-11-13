@@ -6063,7 +6063,7 @@ nav.tabs button[aria-selected="true"] { color: #ffffff; background: #0a6fc9; }
       const panel = sel ? `<div class="cap">
           <pre>${esc(captionText(sel, e.captions[sel]))}</pre>
           <div class="postrow">
-            <a class="go go-${sel}" href="${UPLOAD[sel]}" target="_blank" rel="noopener" data-id="${id}" data-p="${sel}">${LOGO[sel]}<span>คัดลอก + เปิด ${PLAT_TH[sel]}</span></a>
+            <a class="go go-${sel}" href="${UPLOAD[sel]}" target="_blank" rel="noopener" data-id="${id}" data-p="${sel}">${LOGO[sel]}<span>คัดลอกและเปิด ${PLAT_TH[sel]}</span></a>
             <button class="mark ${posted[sel] ? 'on' : ''}" data-mark="${sel}" data-id="${id}" aria-pressed="${!!posted[sel]}" title="ทำเครื่องหมายว่าโพสต์แล้ว">✓</button>
           </div>
         </div>` : '';
