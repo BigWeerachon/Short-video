@@ -9,3 +9,8 @@
 - การ์ด/bubble ค้างจนพูดจบ (L07); เนื้อหาหลักเหนือ y 1650
 - ปากขยับ: narrator ฉาก 1/4, rider ฉาก 2–3 เฉพาะช็อตเห็นหน้า; ghost ไม่ขยับปาก
 - SFX tonal เท่านั้น ตาม cue list (sound)
+
+## เสียง (sound)
+- เสร็จ: audio_plan.json + mix.mp3 (93.17 วิ รวมเสียงปิด), timing.js มี VO_DUR=86.249 END_DUR=6.922; ไม่เร่งเสียง
+- ดนตรี 8 segment ตาม cue list; เงียบตึง 31.4–33.4 (ไม่มีดนตรี) ก่อน boom 33.45; ปลาย warm→cute→outro
+- SFX 28 จุด tonal ล้วน (ลม=theremin, whoosh=boing, เครื่องยนต์=ไม่ใส่); ฉากปิดเริ่ม 86.25
