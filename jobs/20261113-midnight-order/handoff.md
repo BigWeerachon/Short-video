@@ -14,3 +14,8 @@
 - เสร็จ: audio_plan.json + mix.mp3 (93.17 วิ รวมเสียงปิด), timing.js มี VO_DUR=86.249 END_DUR=6.922; ไม่เร่งเสียง
 - ดนตรี 8 segment ตาม cue list; เงียบตึง 31.4–33.4 (ไม่มีดนตรี) ก่อน boom 33.45; ปลาย warm→cute→outro
 - SFX 28 จุด tonal ล้วน (ลม=theremin, whoosh=boing, เครื่องยนต์=ไม่ใส่); ฉากปิดเริ่ม 86.25
+# animator → critic
+- shots.js 37 ช็อต + ของใหม่ใน engine: rider/ghost (cast+rig drawGhost), expr swirl/sweat, mode ride, shiver/goose; scenes: neonStudio, digitalSky, roadNight, motorcycle, mirrorView, hotelRoom/bed/blanket, clock0200, phoneScreen(ไม่มีตัวหนังสือ), sparkles, soulWisp, thoughtBubble
+- contact.jpg ตรวจแล้ว · เทสต์ web ผ่าน 8/8
+- ไม่มั่นใจ: #31–32 ผ้าห่มคลุม (rider โผล่ตา), #22 กล่องอาหารในมือเป็นสี่เหลี่ยมลอย, #34 ฉากใน bubble ถนนเลื่อนไม่เต็มวง, #7 แผนที่เพิ่งเด้งตอน ~12.5
+- #29 วงแตะวนต่อเนื่อง ไม่นับจำนวน (L17) · phone() เดิมมีข้อความ จึงไม่ใช้
