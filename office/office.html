@@ -48,10 +48,11 @@ h2 { font-family: var(--font-display); font-weight: 500; font-size: 17px; margin
 .tnum { font-variant-numeric: tabular-nums; }
 .empty { text-align: center; color: var(--muted); padding: 22px 10px; }
 /* คลังงาน */
-.chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
-.chip { flex: none; font: inherit; font-size: 13px; font-weight: 500; padding: 6px 14px; border-radius: 99px; border: 1px solid var(--line); background: transparent; color: var(--muted); cursor: pointer; }
-.chip[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
-.chip .n { margin-left: 4px; font-size: 11px; opacity: .8; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: inherit; font-size: 13px; font-weight: 500; padding: 5px 12px; border-radius: 99px; border: 0; background: var(--surface); color: var(--muted); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.chip[aria-pressed="true"] { background: #0a6fc9; color: #ffffff; }
+.chip .n { font-size: 11px; min-width: 18px; padding: 0 5px; border-radius: 99px; background: rgba(255,255,255,0.1); text-align: center; }
+.chip[aria-pressed="true"] .n { background: rgba(255,255,255,0.22); }
 .pill { font-size: 12px; padding: 2px 10px; border-radius: 99px; background: var(--accent-soft); color: var(--accent); font-weight: 600; white-space: nowrap; }
 .pill.ready { background: color-mix(in srgb, var(--accent-2) 16%, transparent); color: var(--accent-2); }
 .pill.posted { background: color-mix(in srgb, var(--muted) 16%, transparent); color: var(--muted); }
@@ -6037,7 +6038,8 @@ nav.tabs button[aria-selected="true"] { color: #ffffff; background: #0a6fc9; }
   const HOW = { youtube: 'วางแคปชั่น: บรรทัดแรกเป็นชื่อ ที่เหลือเป็นคำอธิบาย', instagram: 'เลือก "แชร์ไปที่ Instagram" ในหน้าสร้าง Reels', facebook: 'เลือกเพจ PAAKIN ก่อนโพสต์', tiktok: 'วางแคปชั่นในช่องคำอธิบาย' };
   function renderChips() {
     const count = (k) => (k === 'all' ? S.library.length : S.library.filter((e) => e.type === k).length);
-    $('typeChips').innerHTML = FILTERS.map(([k, th]) => `<button class="chip" id="f-${k}" aria-pressed="${S.filter === k}" data-f="${k}">${th}<span class="n">${count(k)}</span></button>`).join('');
+    // แสดงเฉพาะหมวดที่มีงาน (และหมวดที่กำลังเลือก) ลดปุ่มว่าง
+    $('typeChips').innerHTML = FILTERS.filter(([k]) => k === 'all' || k === S.filter || count(k) > 0).map(([k, th]) => `<button class="chip" id="f-${k}" aria-pressed="${S.filter === k}" data-f="${k}">${th}<span class="n">${count(k)}</span></button>`).join('');
   }
   $('typeChips').addEventListener('click', (e) => { const b = e.target.closest('[data-f]'); if (!b) return; S.filter = b.dataset.f; renderChips(); renderLibrary(); });
   function captionText(p, c) {
