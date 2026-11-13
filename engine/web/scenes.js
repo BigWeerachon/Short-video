@@ -395,16 +395,21 @@ export function phoneScreen(ctx, { x = W / 2, y = 900, s = 1, screen = 'order', 
   }
   ctx.restore();
 }
-// มือชี้: ปลายนิ้วชี้อยู่ที่จุดแตะ เอียงมาจากล่างขวา
+// มือชี้: ปลายนิ้วชี้อยู่ที่จุดแตะ เอียงมาจากล่างขวา + แขนเสื้อ (flat ไม่มีเส้นขอบ)
 function pointHand(ctx, x, y, press = 1) {
-  const skin = '#f6c9a2', shade = '#e0a97f';
-  ctx.save(); ctx.translate(x, y); ctx.rotate(-0.45); ctx.scale(press, press);
-  R(ctx, -14, 0, 28, 80, 14, skin);                 // นิ้วชี้
-  R(ctx, -9, 4, 18, 20, 8, '#fde3d0');              // เล็บ
-  R(ctx, -34, 60, 82, 86, 30, skin);                // กำปั้น
-  R(ctx, 12, 64, 26, 34, 12, shade); R(ctx, 12, 96, 26, 30, 12, shade); // นิ้วงอ
-  R(ctx, -44, 84, 30, 50, 14, shade);               // นิ้วโป้ง
-  R(ctx, -22, 140, 60, 70, 16, skin);               // ข้อมือ
+  const skin = '#f8cba6', shade = '#eab38b', light = '#ffe0c7';
+  ctx.save(); ctx.translate(x, y); ctx.rotate(-0.5); ctx.scale(press, press);
+  ctx.fillStyle = '#1fae5b'; ctx.beginPath(); ctx.roundRect(-34, 150, 92, 140, 18); ctx.fill(); // แขนเสื้อ
+  ctx.fillStyle = '#17944c'; ctx.fillRect(-34, 150, 92, 16);                                   // ปลายแขนเสื้อ
+  ctx.fillStyle = skin; ctx.beginPath();                                                        // ซิลลูเอตมือ
+  ctx.moveTo(-15, 14); ctx.quadraticCurveTo(-15, -2, 0, -2); ctx.quadraticCurveTo(15, -2, 15, 14);
+  ctx.lineTo(15, 62); ctx.bezierCurveTo(40, 58, 58, 72, 56, 100); ctx.bezierCurveTo(56, 136, 40, 156, 20, 158);
+  ctx.lineTo(-24, 158); ctx.bezierCurveTo(-40, 140, -46, 112, -38, 92); ctx.bezierCurveTo(-32, 78, -22, 70, -15, 66);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = shade;                                                                        // ร่องนิ้วที่งอ
+  for (const yy of [88, 112, 134]) { ctx.beginPath(); ctx.ellipse(36, yy, 18, 4, 0, 0, Math.PI * 2); ctx.fill(); }
+  ctx.fillStyle = light; ctx.beginPath(); ctx.ellipse(-28, 112, 12, 26, -0.25, 0, Math.PI * 2); ctx.fill(); // นิ้วโป้ง
+  ctx.beginPath(); ctx.roundRect(-8, 4, 16, 18, 7); ctx.fill();                                // เล็บ
   ctx.restore();
 }
 export function pin(ctx, x, y, color = '#ff4d6d', s = 1) {
