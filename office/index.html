@@ -1,0 +1,346 @@
+<title>PAAKIN Studio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@500;600&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap">
+<style>
+/* Layout: แอปหน้าเดียวสำหรับมือถือ — ออฟฟิศพิกเซลด้านบน, การ์ดงานปัจจุบัน, แท็บล่าง 3 แท็บ */
+:root {
+  --bg: #f3f5fa; --surface: #ffffff; --ink: #1c2236; --muted: #677089; --line: #e2e6f0;
+  --accent: #2f6fdf; --accent-2: #22b98a; --accent-soft: #e6efff;
+  --ok: #1f9d63; --warn: #d98a12; --idle: #a3abbf;
+  --floor: #dfe5f2; --wall: #c9d2e6;
+  --font-display: 'Kanit', 'IBM Plex Sans Thai', system-ui, sans-serif;
+  --font-body: 'IBM Plex Sans Thai', 'Kanit', system-ui, sans-serif;
+  --radius: 14px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #12151f; --surface: #1b2030; --ink: #e9ecf5; --muted: #98a0b8; --line: #2a3145;
+  --accent: #6aa0ff; --accent-2: #3fd6a6; --accent-soft: #22304f; --ok: #45c98a; --warn: #f0b04a; --idle: #59617a;
+  --floor: #262d42; --wall: #323b56; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #12151f; --surface: #1b2030; --ink: #e9ecf5; --muted: #98a0b8; --line: #2a3145;
+  --accent: #6aa0ff; --accent-2: #3fd6a6; --accent-soft: #22304f; --ok: #45c98a; --warn: #f0b04a; --idle: #59617a;
+  --floor: #262d42; --wall: #323b56; color-scheme: dark }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
+.app { max-width: 560px; margin: 0 auto; min-height: 100%; display: flex; flex-direction: column;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 14px calc(84px + env(safe-area-inset-bottom, 0px)); gap: 14px; }
+header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+h1 { font-family: var(--font-display); font-weight: 600; font-size: 22px; margin: 0; letter-spacing: 0.2px; }
+h1 b { color: var(--accent); font-weight: 600; }
+.sync { font-size: 12px; color: var(--muted); }
+h2 { font-family: var(--font-display); font-weight: 500; font-size: 17px; margin: 0; }
+.view { display: flex; flex-direction: column; gap: 14px; }
+/* ออฟฟิศ */
+.office { position: relative; border-radius: var(--radius); overflow: hidden; background: var(--wall); }
+.office canvas { display: block; width: 100%; height: auto; image-rendering: pixelated; }
+.rooms { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); pointer-events: none; }
+.rooms span { align-self: start; justify-self: start; margin: 5px 6px; font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 99px;
+  background: color-mix(in srgb, var(--surface) 85%, transparent); color: var(--muted); }
+.rooms span.on { background: var(--accent); color: #fff; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.muted { color: var(--muted); font-size: 13px; }
+.bar { height: 8px; border-radius: 99px; background: var(--accent-soft); overflow: hidden; }
+.bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius: 99px; transition: width .4s; }
+.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.steps li { display: grid; grid-template-columns: 18px 1fr auto; gap: 8px; align-items: center; font-size: 14px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--idle); justify-self: center; }
+.steps li.done .dot { background: var(--ok); }
+.steps li.now .dot { background: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+.steps li.done span:nth-child(2) { color: var(--muted); }
+.tnum { font-variant-numeric: tabular-nums; }
+.empty { text-align: center; color: var(--muted); padding: 22px 10px; }
+/* คลังงาน */
+.chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
+.chip { flex: none; font: inherit; font-size: 13px; padding: 5px 12px; border-radius: 99px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.pill { font-size: 12px; padding: 1px 9px; border-radius: 99px; background: var(--accent-soft); color: var(--accent); font-weight: 600; white-space: nowrap; }
+.pill.ready { background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok); }
+.pill.posted { background: color-mix(in srgb, var(--muted) 15%, transparent); color: var(--muted); }
+.pill.review { background: color-mix(in srgb, var(--warn) 15%, transparent); color: var(--warn); }
+.item h3 { margin: 0; font-size: 15px; font-weight: 600; }
+.plats { display: flex; gap: 6px; flex-wrap: wrap; }
+.plat { font-size: 12px; color: var(--muted); border: 1px dashed var(--line); border-radius: 8px; padding: 1px 7px; }
+.plat.posted { color: var(--ok); border-style: solid; border-color: color-mix(in srgb, var(--ok) 40%, transparent); }
+details summary { cursor: pointer; color: var(--accent); font-size: 14px; font-weight: 500; }
+.cap { border-top: 1px solid var(--line); padding-top: 10px; margin-top: 8px; display: flex; flex-direction: column; gap: 6px; }
+.cap pre { margin: 0; white-space: pre-wrap; word-break: break-word; font-family: var(--font-body); font-size: 14px; background: var(--bg); border-radius: 10px; padding: 10px; }
+button.copy { align-self: flex-start; font: inherit; font-size: 13px; padding: 5px 12px; border-radius: 10px; border: 0; background: var(--accent); color: #fff; cursor: pointer; }
+button.copy.done { background: var(--ok); }
+button:focus-visible, .chip:focus-visible, summary:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 50%, transparent); outline-offset: 2px; }
+.report pre { margin: 0; white-space: pre-wrap; font-family: var(--font-body); font-size: 14px; }
+/* แท็บล่าง */
+nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; background: var(--surface); border-top: 1px solid var(--line);
+  padding: 6px max(16px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+nav.tabs .in { max-width: 560px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+nav.tabs button { font: inherit; font-family: var(--font-display); font-weight: 500; font-size: 14px; border: 0; background: none; color: var(--muted);
+  padding: 8px 4px; border-radius: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+nav.tabs button svg { width: 22px; height: 22px; }
+nav.tabs button[aria-selected="true"] { color: var(--accent); background: var(--accent-soft); }
+@media (prefers-reduced-motion: reduce) { .bar i { transition: none; } }
+</style>
+
+<div class="app">
+  <header>
+    <h1>PAAKIN <b>Studio</b></h1>
+    <span class="sync" id="sync">กำลังเชื่อมต่อ…</span>
+  </header>
+
+  <section class="view" id="view-office">
+    <div class="office" id="officeBox">
+      <canvas id="px" width="180" height="210" aria-label="ออฟฟิศพิกเซล แสดงตำแหน่งที่กำลังทำงาน"></canvas>
+      <div class="rooms" id="rooms"></div>
+    </div>
+    <div class="card" id="jobCard"></div>
+  </section>
+
+  <section class="view" id="view-library" hidden>
+    <div class="chips" id="typeChips" role="group" aria-label="กรองประเภท"></div>
+    <div id="libList" class="view"></div>
+  </section>
+
+  <section class="view" id="view-reports" hidden>
+    <div id="reportList" class="view"></div>
+    <div class="card"><h2>บทเรียนล่าสุด</h2><div id="lessonList" class="view"></div></div>
+  </section>
+</div>
+
+<nav class="tabs" aria-label="เมนู"><div class="in" role="tablist">
+  <button role="tab" id="tab-office" aria-selected="true" aria-controls="view-office"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 12h18M12 4v16"/></svg>ออฟฟิศ</button>
+  <button role="tab" id="tab-library" aria-selected="false" aria-controls="view-library"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h6v14H4zM14 5h6v14h-6z"/></svg>คลังงาน</button>
+  <button role="tab" id="tab-reports" aria-selected="false" aria-controls="view-reports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l3 3v15H6z"/><path d="M9 11h6M9 15h6"/></svg>รายงาน</button>
+</div></nav>
+
+<script>
+(() => {
+  // ---------- ข้อมูลคงที่ ----------
+  const ROOMS = [
+    ['director', 'ผู้อำนวยการ'], ['writer', 'เขียนบท'], ['sound', 'ห้องเสียง'],
+    ['film-director', 'ผู้กำกับ'], ['animator', 'แอนิเมชัน'], ['editor', 'ตัดต่อ'],
+    ['critic', 'ห้องฉาย'], ['marketing', 'การตลาด'], ['library', 'คลังงาน'],
+  ];
+  const ROLE_ROOM = { director: 'director', writer: 'writer', sound: 'sound', 'film-director': 'film-director', animator: 'animator',
+    editor: 'editor', critic: 'critic', marketer: 'marketing', planner: 'marketing', librarian: 'library' };
+  const ROLE_TH = { director: 'ผู้อำนวยการ', writer: 'ผู้เขียนบท', sound: 'วิศวกรเสียง', 'film-director': 'ผู้กำกับ', animator: 'นักแอนิเมต',
+    editor: 'ช่างตัดต่อ', critic: 'นักวิจารณ์', marketer: 'นักการตลาด', planner: 'นักวางแผน', librarian: 'บรรณารักษ์' };
+  const SHIRT = { director: '#6d4bd8', writer: '#e8794a', sound: '#2aa7c9', 'film-director': '#d6455d', animator: '#f2b134',
+    editor: '#3c8f5a', critic: '#7a5c3c', marketer: '#e15fa8', planner: '#4f7ce8', librarian: '#8a8fa6' };
+  const TYPE_TH = { story_clip: 'คลิปนิทาน', promo: 'โพสต์โปรโมท', news: 'ข่าวสาร', event: 'กิจกรรม' };
+  const STATUS_TH = { draft: 'ร่าง', review: 'รอตรวจ', ready: 'พร้อมโพสต์', posted: 'โพสต์แล้ว' };
+  const PLAT_TH = { youtube: 'YouTube', facebook: 'Facebook', tiktok: 'TikTok', instagram: 'Instagram' };
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+  const S = { job: null, library: [], reports: [], lessons: [], filter: 'all', connected: false };
+
+  // ---------- แท็บ ----------
+  const tabs = ['office', 'library', 'reports'];
+  function show(name) {
+    tabs.forEach((t) => { $('tab-' + t).setAttribute('aria-selected', String(t === name)); $('view-' + t).hidden = t !== name; });
+    try { localStorage.setItem('tab', name); } catch (e) {}
+  }
+  tabs.forEach((t) => $('tab-' + t).addEventListener('click', () => show(t)));
+  try { const t = localStorage.getItem('tab'); if (tabs.includes(t)) show(t); } catch (e) {}
+
+  // ---------- ออฟฟิศพิกเซล ----------
+  const cv = $('px'), g = cv.getContext('2d');
+  const RW = 60, RH = 70; // ห้องละ 60×70 px (ตรรกะ)
+  $('rooms').innerHTML = ROOMS.map(([id, th]) => `<span data-room="${id}">${th}</span>`).join('');
+  const roomCenter = (room) => { const i = ROOMS.findIndex((r) => r[0] === room); return { x: (i % 3) * RW + RW / 2, y: Math.floor(i / 3) * RH + 46, i }; };
+  // ตัวละคร: แต่ละตำแหน่งนั่งโต๊ะในห้องตัวเอง
+  const chars = {};
+  Object.keys(ROLE_ROOM).forEach((role) => {
+    const c = roomCenter(ROLE_ROOM[role]);
+    const off = role === 'planner' ? 12 : role === 'marketer' ? -12 : 0;
+    chars[role] = { role, home: { x: c.x + off, y: c.y }, x: c.x + off, y: c.y, path: [], room: ROLE_ROOM[role] };
+  });
+  function routeTo(ch, room) {
+    const to = roomCenter(room), from = { x: ch.x, y: ch.y };
+    const hall = Math.floor((from.y) / RH) * RH + RH - 4; // ทางเดินใต้ห้องต้นทาง
+    const colX = to.x;
+    ch.path = [{ x: from.x, y: hall }, { x: colX, y: hall }, { x: colX, y: to.y }];
+    ch.target = room;
+  }
+  let lastRole = null;
+  function onJob() {
+    const role = S.job && S.job.status !== 'done' ? S.job.role : null;
+    if (role && lastRole && role !== lastRole && chars[lastRole]) {
+      // คนเดิมเดินเอางานไปส่งห้องใหม่ แล้วเดินกลับ
+      const ch = chars[lastRole];
+      routeTo(ch, ROLE_ROOM[role]);
+      ch.returnAfter = true;
+    }
+    lastRole = role;
+    document.querySelectorAll('#rooms span').forEach((s) => s.classList.toggle('on', !!role && s.dataset.room === ROLE_ROOM[role]));
+  }
+  function step(dt) {
+    for (const ch of Object.values(chars)) {
+      if (!ch.path.length) continue;
+      const p = ch.path[0], dx = p.x - ch.x, dy = p.y - ch.y, d = Math.hypot(dx, dy), v = 34 * dt;
+      if (d <= v) { ch.x = p.x; ch.y = p.y; ch.path.shift(); } else { ch.x += dx / d * v; ch.y += dy / d * v; }
+      ch.walking = true;
+      if (!ch.path.length) {
+        ch.walking = false;
+        ch.room = ch.target;
+        if (ch.returnAfter) { ch.returnAfter = false; ch.pause = 1.2; }
+      }
+    }
+    for (const ch of Object.values(chars)) {
+      if (ch.pause > 0) { ch.pause -= dt; if (ch.pause <= 0) { routeTo(ch, ROLE_ROOM[ch.role]); ch.path[ch.path.length - 1] = { ...ch.home }; } }
+    }
+  }
+  function px(x, y, w, h, c) { g.fillStyle = c; g.fillRect(Math.round(x), Math.round(y), w, h); }
+  function drawRoom(i, active, t) {
+    const x = (i % 3) * RW, y = Math.floor(i / 3) * RH;
+    px(x, y, RW, RH, css('--wall'));
+    px(x + 2, y + 18, RW - 4, RH - 22, css('--floor'));
+    // ลายพื้น
+    for (let k = 0; k < 6; k++) px(x + 2, y + 24 + k * 8, RW - 4, 1, 'rgba(0,0,0,0.05)');
+    // ของประจำห้อง
+    const id = ROOMS[i][0];
+    if (id === 'sound') { px(x + 6, y + 30, 6, 12, '#2b3045'); px(x + 7, y + 32, 4, 4, '#56607a'); px(x + 48, y + 30, 6, 12, '#2b3045'); }
+    if (id === 'library') for (let k = 0; k < 3; k++) { px(x + 4, y + 24 + k * 9, 14, 2, '#7a5235'); px(x + 5, y + 19 + k * 9, 3, 5, '#e8794a'); px(x + 9, y + 20 + k * 9, 3, 4, '#4f7ce8'); px(x + 13, y + 19 + k * 9, 3, 5, '#22b98a'); }
+    if (id === 'critic') { px(x + 8, y + 22, 44, 14, '#1d2233'); px(x + 10, y + 24, 40, 10, active ? '#ffd86b' : '#3a4260'); }
+    if (id === 'director') { px(x + 46, y + 24, 8, 10, '#f2b134'); px(x + 49, y + 21, 2, 3, '#f2b134'); }
+    if (id === 'writer') { px(x + 6, y + 26, 10, 12, '#ffffff'); px(x + 8, y + 29, 6, 1, '#9aa3bd'); px(x + 8, y + 32, 6, 1, '#9aa3bd'); }
+    if (id === 'animator') { px(x + 46, y + 24, 8, 12, '#ffffff'); px(x + 48, y + 27, 4, 4, '#e8794a'); }
+    if (id === 'editor') { px(x + 6, y + 28, 12, 8, '#2b3045'); px(x + 7, y + 29, 10, 2, '#e15fa8'); px(x + 7, y + 32, 7, 2, '#2aa7c9'); }
+    if (id === 'marketing') { px(x + 6, y + 24, 12, 10, '#ffffff'); px(x + 8, y + 30, 2, 3, '#22b98a'); px(x + 11, y + 28, 2, 5, '#22b98a'); px(x + 14, y + 26, 2, 7, '#22b98a'); }
+    if (id === 'film-director') { px(x + 46, y + 26, 10, 6, '#1d2233'); px(x + 46, y + 25, 10, 2, '#ffffff'); }
+    // ต้นไม้
+    px(x + RW - 9, y + RH - 14, 5, 6, '#c96f4a'); px(x + RW - 11, y + RH - 20, 9, 7, '#2fa86a');
+    if (active) { g.strokeStyle = css('--accent'); g.lineWidth = 2; g.strokeRect(x + 2, y + 2, RW - 4, RH - 4); }
+  }
+  // โต๊ะ + จอ (วาดหลังคนนั่ง เพื่อให้คนนั่งอยู่หลังโต๊ะ)
+  function drawDesk(i, active, t) {
+    const x = (i % 3) * RW, y = Math.floor(i / 3) * RH;
+    px(x + 18, y + 44, 24, 6, '#9a6b45'); px(x + 20, y + 50, 2, 8, '#7a5235'); px(x + 38, y + 50, 2, 8, '#7a5235');
+    px(x + 25, y + 37, 10, 7, '#2b3045'); px(x + 26, y + 38, 8, 5, active ? (Math.floor(t * 4) % 2 ? '#7cc4ff' : '#a8dcff') : '#56607a');
+  }
+  function drawPerson(ch, t, working) {
+    const x = Math.round(ch.x) - 3, bob = ch.walking ? (Math.floor(t * 8) % 2) : (working ? (Math.floor(t * 3) % 2) : 0);
+    const y = Math.round(ch.y) - 14 - (ch.walking ? bob : 0);
+    px(x + 1, y, 5, 2, '#2b2233');            // ผม
+    px(x + 1, y + 2, 5, 4, '#f6c9a2');        // หน้า
+    px(x + 2, y + 3, 1, 1, '#2b2233'); px(x + 4, y + 3, 1, 1, '#2b2233');
+    px(x, y + 6, 7, 5, SHIRT[ch.role]);       // เสื้อ
+    if (working && !ch.walking) { px(x - 1, y + 7 + bob, 1, 2, '#f6c9a2'); px(x + 7, y + 8 - bob, 1, 2, '#f6c9a2'); }
+    const leg = ch.walking ? Math.floor(t * 8) % 2 : 0;
+    px(x + 1, y + 11, 2, 3 - leg, '#3a3350'); px(x + 4, y + 11, 2, 2 + leg, '#3a3350');
+    if (ch.walking) { px(x + 7, y + 7, 4, 3, '#ffffff'); px(x + 8, y + 8, 2, 1, '#9aa3bd'); } // ถือแฟ้มงาน
+    if (working && !ch.walking) { // บอลลูนกำลังทำงาน
+      const k = Math.floor(t * 2) % 3;
+      px(x + 1, y - 7, 9, 5, '#ffffff'); for (let d = 0; d < 3; d++) px(x + 2 + d * 3, y - 5, 1, 1, d === k ? css('--accent') : '#9aa3bd');
+    }
+  }
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.05, (now - last) / 1000), t = now / 1000; last = now;
+    step(dt);
+    g.clearRect(0, 0, cv.width, cv.height);
+    const activeRole = S.job && S.job.status !== 'done' ? S.job.role : null;
+    ROOMS.forEach((r, i) => drawRoom(i, activeRole && ROLE_ROOM[activeRole] === r[0], t));
+    const seated = Object.values(chars).filter((c) => !c.walking), walkers = Object.values(chars).filter((c) => c.walking);
+    seated.forEach((ch) => drawPerson(ch, t, ch.role === activeRole));
+    ROOMS.forEach((r, i) => drawDesk(i, activeRole && ROLE_ROOM[activeRole] === r[0], t));
+    walkers.forEach((ch) => drawPerson(ch, t, false));
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  // ---------- การ์ดงานปัจจุบัน ----------
+  function renderJob() {
+    const j = S.job, el = $('jobCard');
+    if (!j) {
+      el.innerHTML = `<div class="empty"><h2>ยังไม่มีงาน</h2><p class="muted">สั่ง <b>/make-clip</b> ใน Claude Code พร้อมแนบบทและไฟล์เสียง แล้วทีมจะเริ่มทำงานที่นี่</p></div>`;
+      return;
+    }
+    const pct = Math.round((j.progress || 0) * 100);
+    const steps = (j.timeline || []).map((s) => {
+      const cls = s.done ? 'done' : s.role === j.role && j.status !== 'done' ? 'now' : '';
+      return `<li class="${cls}"><span class="dot"></span><span>${esc(s.stage)} · <span class="muted">${esc(ROLE_TH[s.role] || s.role)}</span></span><span class="muted tnum">${s.done ? 'เสร็จ' : esc(s.eta || '')}</span></li>`;
+    }).join('');
+    const tk = j.tokens || {};
+    el.innerHTML = `
+      <div class="row"><h2>${esc(j.title)}</h2><span class="pill ${j.status === 'done' ? 'ready' : ''}">${j.status === 'done' ? 'เสร็จแล้ว' : esc(ROLE_TH[j.role] || j.role) + ' กำลังทำ'}</span></div>
+      <div class="muted">${esc(j.stage || '')}</div>
+      <div class="bar" aria-label="ความคืบหน้า ${pct}%"><i style="width:${pct}%"></i></div>
+      <div class="row muted tnum"><span>คืบหน้า ${pct}%</span><span>token ${fmtK(tk.used)} / ${fmtK(tk.budget)}</span></div>
+      ${steps ? `<ul class="steps">${steps}</ul>` : ''}`;
+  }
+  const fmtK = (n) => (n == null ? '–' : n >= 1000 ? (n / 1000).toFixed(n >= 100000 ? 0 : 1) + 'k' : String(n));
+
+  // ---------- คลังงาน ----------
+  const FILTERS = [['all', 'ทั้งหมด'], ...Object.entries(TYPE_TH)];
+  function renderChips() {
+    $('typeChips').innerHTML = FILTERS.map(([k, th]) => `<button class="chip" id="f-${k}" aria-pressed="${S.filter === k}" data-f="${k}">${th}</button>`).join('');
+  }
+  $('typeChips').addEventListener('click', (e) => { const b = e.target.closest('[data-f]'); if (!b) return; S.filter = b.dataset.f; renderChips(); renderLibrary(); });
+  function captionText(p, c) {
+    if (!c) return '';
+    if (p === 'youtube') return [c.title, '', c.description, (c.tags || []).map((x) => '#' + x.replace(/^#/, '')).join(' ')].join('\n').trim();
+    return [c.text, (c.hashtags || []).join(' ')].filter(Boolean).join('\n\n');
+  }
+  function renderLibrary() {
+    const items = S.library.filter((e) => S.filter === 'all' || e.type === S.filter);
+    if (!items.length) {
+      $('libList').innerHTML = `<div class="card empty">${S.library.length ? 'ไม่มีงานในหมวดนี้' : 'คลังยังว่าง — งานที่ทำเสร็จจะถูกเก็บที่นี่พร้อมแคปชั่นแยกแพลตฟอร์ม'}</div>`;
+      return;
+    }
+    $('libList').innerHTML = items.map((e) => {
+      const plats = Object.keys(PLAT_TH).map((p) => `<span class="plat ${e.posted && e.posted[p] ? 'posted' : ''}">${PLAT_TH[p]}${e.posted && e.posted[p] ? ' ✓' : ''}</span>`).join('');
+      const caps = e.captions ? Object.keys(PLAT_TH).filter((p) => e.captions[p]).map((p) => `
+        <div class="cap"><div class="row"><b>${PLAT_TH[p]}</b><button class="copy" data-id="${esc(e.id)}" data-p="${p}">คัดลอก</button></div><pre>${esc(captionText(p, e.captions[p]))}</pre></div>`).join('') : '';
+      const meta = [e.series, (e.characters || []).join(', '), e.paakin_feature].filter(Boolean).map(esc).join(' · ');
+      return `<article class="card item">
+        <div class="row"><h3>${esc(e.title)}</h3><span class="pill ${esc(e.status)}">${STATUS_TH[e.status] || esc(e.status)}</span></div>
+        <div class="muted">${TYPE_TH[e.type] || esc(e.type)}${meta ? ' · ' + meta : ''}</div>
+        <div class="plats">${plats}</div>
+        ${caps ? `<details><summary>แคปชั่นแยกแพลตฟอร์ม</summary>${caps}</details>` : ''}
+      </article>`;
+    }).join('');
+  }
+  $('libList').addEventListener('click', (ev) => {
+    const b = ev.target.closest('button.copy'); if (!b) return;
+    const e = S.library.find((x) => x.id === b.dataset.id); if (!e) return;
+    const text = captionText(b.dataset.p, e.captions[b.dataset.p]);
+    const ok = () => { b.textContent = 'คัดลอกแล้ว'; b.classList.add('done'); setTimeout(() => { b.textContent = 'คัดลอก'; b.classList.remove('done'); }, 1600); };
+    const fallback = () => { const pre = b.closest('.cap').querySelector('pre'); const r = document.createRange(); r.selectNodeContents(pre); const s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'เลือกข้อความแล้ว'; };
+    try { navigator.clipboard.writeText(text).then(ok, fallback); } catch (err) { fallback(); }
+  });
+
+  // ---------- รายงาน ----------
+  function renderReports() {
+    $('reportList').innerHTML = S.reports.length ? S.reports.map((r) => `
+      <article class="card report"><div class="row"><h2>${esc(r.title || r.jobId)}</h2><span class="muted tnum">${esc(r.date || '')}</span></div><pre>${esc(r.text)}</pre></article>`).join('')
+      : `<div class="card empty">ยังไม่มีรายงาน — ผู้อำนวยการจะสรุปงานที่นี่ทุกครั้งที่จบงาน</div>`;
+    $('lessonList').innerHTML = S.lessons.length ? S.lessons.map((l) => `<div><b>${esc(ROLE_TH[l.role] || l.role || '')}</b> <span class="muted tnum">${esc(l.date || '')}</span><div>${esc(l.text)}</div></div>`).join('')
+      : `<div class="muted">ยังไม่มีบทเรียนใหม่ — สั่ง <b>/remember</b> เมื่อต้องการให้ทีมจำเรื่องใด</div>`;
+  }
+
+  function renderAll() { renderJob(); renderChips(); renderLibrary(); renderReports(); onJob(); }
+  renderAll();
+
+  // ---------- เชื่อมฐานข้อมูล ----------
+  (async () => {
+    const timer = setTimeout(() => { if (!S.connected) $('sync').textContent = 'ยังเชื่อมต่อข้อมูลไม่ได้'; }, 10000);
+    const db = window.claude && window.claude.use ? await window.claude.use('db') : null;
+    if (!db) { clearTimeout(timer); $('sync').textContent = 'ออฟไลน์ (ไม่มีข้อมูล)'; return; }
+    const mark = (snap) => { if (!snap.metadata || !snap.metadata.fromCache) { S.connected = true; clearTimeout(timer); $('sync').textContent = 'อัปเดตสด'; } };
+    const err = () => { clearTimeout(timer); $('sync').textContent = 'เชื่อมต่อข้อมูลไม่ได้'; };
+    const rows = (snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    db.collection('jobs').orderBy('updated', 'desc').limit(1).onSnapshot((s) => { mark(s); S.job = rows(s)[0] || null; renderJob(); onJob(); }, err);
+    db.collection('library').orderBy('created', 'desc').limit(200).onSnapshot((s) => { mark(s); S.library = rows(s); renderLibrary(); }, err);
+    db.collection('reports').orderBy('date', 'desc').limit(20).onSnapshot((s) => { mark(s); S.reports = rows(s); renderReports(); }, err);
+    db.collection('lessons').orderBy('date', 'desc').limit(10).onSnapshot((s) => { mark(s); S.lessons = rows(s); renderReports(); }, err);
+  })();
+
+  // สำหรับทดสอบ
+  window.__office = { charRoom: (role) => chars[role] && !chars[role].path.length ? roomOf(chars[role]) : null, activeRoom: () => (S.job ? ROLE_ROOM[S.job.role] : null) };
+  function roomOf(ch) { const col = Math.min(2, Math.floor(ch.x / RW)), row = Math.min(2, Math.floor(ch.y / RH)); return ROOMS[row * 3 + col][0]; }
+})();
+</script>

@@ -29,9 +29,9 @@
 - Engine กลาง: `engine/audio` (Python), `engine/web` (canvas player), `engine/render` (export)
 - คลังงาน: `library/` ผ่าน `engine/content/library.py`
 - คำสั่ง: `/make-clip` `/fix-clip` `/captions` `/post` `/plan-week` `/report` `/remember`
-- ออฟฟิศพิกเซล: ดู `office/README.md` (URL + วิธีอัปเดตสถานะ)
+- ออฟฟิศพิกเซล: https://claude.ai/artifact/RtbKxpcQYLqzEgKCsFgWuy — วิธีอัปเดต `engine/office/status.md`
 
 ## คำสั่งตรวจ
 ```bash
-python -m pytest -q && node --test tests/web/*.test.mjs && python scripts/check_policy.py
+python -m pytest -q && node --test tests/web/*.test.mjs tests/office/*.test.mjs && python scripts/check_policy.py
 ```
