@@ -58,9 +58,19 @@ const DEF = { x: 540, y: 1500, scale: 1, dir: 1, expr: 'happy', talk: false, mod
  * วาดตัวละคร — origin = กึ่งกลางเท้า
  * pose: {x,y,scale,dir,expr,talk,mode:'stand'|'sit'|'walk'|'sleep',arms:{l,r},walkPhase,prop,armsFront}
  */
+/** บันทึกการวาดตัวละครทุกครั้งสำหรับทีม QA (เปิดเฉพาะตอนตรวจ) */
+export const qaLog = { on: false, items: [] };
+
 export function drawChar(ctx, castId, pose = {}) {
   const c = CAST[castId];
   if (!c) throw new Error(`ไม่มีตัวละคร ${castId}`);
+  if (qaLog.on) {
+    const m = ctx.getTransform ? ctx.getTransform() : null;
+    const pt = m ? m.transformPoint({ x: pose.x ?? DEF.x, y: pose.y ?? DEF.y }) : { x: pose.x, y: pose.y };
+    const k = (m ? Math.hypot(m.a, m.b) : 1) * (pose.scale ?? 1) * (c.size || 1);
+    qaLog.items.push({ cast: castId, x: Math.round(pt.x), y: Math.round(pt.y), h: Math.round(380 * k), talk: !!pose.talk,
+      expr: pose.expr || 'happy', mode: pose.mode || 'stand', flip: !!(pose.dir < 0) });
+  }
   if (c.type === 'ghost') { drawGhost(ctx, pose); return; }
   const p = { ...DEF, ...pose, arms: { ...(pose.arms || {}) } };
   const t = clock.t + (c.seed || 0);

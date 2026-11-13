@@ -69,8 +69,9 @@
     ['writer', 'ผู้เขียนบท', 53, 187, 'up'], ['animator', 'นักแอนิเมต', 87, 187, 'up'],
     ['marketer', 'นักการตลาด', 183, 187, 'up'], ['planner', 'นักวางแผนคอนเทนต์', 217, 187, 'up'],
     ['librarian', 'บรรณารักษ์', 121, 247, 'up'],
+    ['qav', 'QA ภาพนิ่ง', 53, 247, 'up'], ['qam', 'QA การเคลื่อนไหว', 87, 247, 'up'], ['qaa', 'QA เสียง-ภาพ', 183, 247, 'up'],
   ].map(([id, name, x, y, dir], i) => ({ id, name, x, y, dir, seat: { x, y, dir }, phase: i * 0.37, route: null, walking: false, flip: false, f: 0, t: 0, pause: 0 }));
-  const ROLE_TO_STAFF = { director: 'director', writer: 'writer', sound: 'sound', 'film-director': 'film', animator: 'animator', editor: 'editor', critic: 'critic', marketer: 'marketer', planner: 'planner', librarian: 'librarian' };
+  const ROLE_TO_STAFF = { director: 'director', writer: 'writer', sound: 'sound', 'film-director': 'film', animator: 'animator', editor: 'editor', critic: 'critic', marketer: 'marketer', planner: 'planner', librarian: 'librarian', 'qa-visual': 'qav', 'qa-motion': 'qam', 'qa-av': 'qaa' };
   let activeId = null, studio = false;
   const EXIT = { x: 9 * T, y: 18 * T, w: 32, h: 16 };
 
