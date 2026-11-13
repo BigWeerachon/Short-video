@@ -108,6 +108,14 @@ button.mark.on { background: color-mix(in srgb, var(--accent-2) 18%, var(--bg));
 button.dl { width: 36px; height: 36px; padding: 0; justify-content: center; border-radius: 10px; }
 button.dl svg { width: 18px; height: 18px; }
 #toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 9; background: var(--ink); color: var(--bg); font-size: 13px; padding: 8px 14px; border-radius: 10px; white-space: nowrap; }
+.agents { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.ag { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 10px; background: var(--bg); font-size: 13.5px; min-width: 0; }
+.ag span:nth-child(2) { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ag .tag { font-size: 11.5px; color: var(--muted); }
+.ag.done .dot { background: var(--ok); }
+.ag.now { background: #0a6fc9; color: #fff; }
+.ag.now .dot { background: #fff; }
+.ag.now .tag { color: #fff; opacity: .9; }
 /* รายงาน */
 .rep { gap: 10px; }
 .todo { display: grid; gap: 2px; padding: 10px 12px; border-radius: 10px; background: #0a6fc9; color: #fff; }
@@ -117,7 +125,7 @@ button.dl svg { width: 18px; height: 18px; }
 .tok { display: grid; gap: 4px; font-size: 13px; }
 .bar.thin { height: 5px; }
 .facts { list-style: none; margin: 0; padding: 0; display: grid; font-size: 13.5px; }
-.facts li { display: grid; grid-template-columns: 70px 1fr; gap: 10px; padding: 7px 0; border-top: 1px solid var(--line); }
+.facts li { display: grid; grid-template-columns: 96px 1fr; gap: 10px; padding: 7px 0; border-top: 1px solid var(--line); }
 .facts li .muted { font-size: 12.5px; }
 button.more { justify-self: start; font: inherit; font-size: 13px; color: var(--accent); background: none; border: 0; padding: 2px 0; cursor: pointer; }
 .report { gap: 12px; }
@@ -7211,17 +7219,22 @@ nav.tabs button[aria-selected="true"] { color: #ffffff; background: #0a6fc9; }
       return;
     }
     const pct = Math.round((j.progress || 0) * 100);
-    const steps = (j.timeline || []).map((s) => {
-      const cls = s.done ? 'done' : s.role === j.role && j.status !== 'done' ? 'now' : '';
-      return `<li class="${cls}"><span class="dot"></span><span>${esc(s.stage)} · <span class="muted">${esc(ROLE_TH[s.role] || s.role)}</span></span><span class="muted tnum">${s.done ? 'เสร็จ' : esc(s.eta || '')}</span></li>`;
-    }).join('');
+    // แสดงเฉพาะชื่อ agent ที่ทำสำเร็จ / กำลังทำ (รายละเอียดขั้นตอนอยู่ในแท็บรายงาน)
+    const roles = [];
+    for (const st of j.timeline || []) if (st.role && !roles.includes(st.role)) roles.push(st.role);
+    const stateOf = (r) => {
+      const mine = (j.timeline || []).filter((st) => st.role === r);
+      if (j.status !== 'done' && r === j.role) return 'now';
+      return mine.length && mine.every((st) => st.done) ? 'done' : null;
+    };
+    const agents = roles.map((r) => [r, stateOf(r)]).filter(([, st]) => st)
+      .map(([r, st]) => `<li class="ag ${st}"><span class="dot"></span><span>${esc(ROLE_TH[r] || r)}</span><span class="tag">${st === 'now' ? 'กำลังทำ' : 'สำเร็จ'}</span></li>`).join('');
     const tk = j.tokens || {};
     el.innerHTML = `
-      <div class="row"><h2>${esc(j.title)}</h2><span class="pill ${j.status === 'done' ? 'ready' : ''}">${j.status === 'done' ? 'เสร็จแล้ว' : esc(ROLE_TH[j.role] || j.role) + ' กำลังทำ'}</span></div>
-      <div class="muted">${esc(j.stage || '')}</div>
+      <div class="row"><h2>${esc(j.title)}</h2><span class="pill ${j.status === 'done' ? 'ready' : ''}">${j.status === 'done' ? 'เสร็จแล้ว' : 'กำลังทำ'}</span></div>
       <div class="bar" aria-label="ความคืบหน้า ${pct}%"><i style="width:${pct}%"></i></div>
       <div class="row muted tnum"><span>คืบหน้า ${pct}%</span><span>token ${fmtK(tk.used)} / ${fmtK(tk.budget)}</span></div>
-      ${steps ? `<ul class="steps">${steps}</ul>` : ''}`;
+      ${agents ? `<ul class="agents">${agents}</ul>` : ''}`;
   }
   const fmtK = (n) => (n == null ? '–' : n >= 1000 ? (n / 1000).toFixed(n >= 100000 ? 0 : 1) + 'k' : String(n));
 
@@ -7345,7 +7358,13 @@ nav.tabs button[aria-selected="true"] { color: #ffffff; background: #0a6fc9; }
     return `<div class="tok"><div class="row"><span class="muted">token</span><span class="tnum">${m[1]}k / ${m[2]}k</span></div><div class="bar thin"><i style="width:${pct}%"></i></div></div>`;
   }
   function renderReports() {
-    $('reportList').innerHTML = S.reports.length ? S.reports.map((r, idx) => {
+    const j = S.job;
+    const live = j && (j.timeline || []).length ? `<article class="card rep">
+        <div class="report-head"><h2>${esc(j.title)}</h2><span class="date">${j.status === 'done' ? 'เสร็จแล้ว' : 'กำลังทำ'}</span></div>
+        ${j.stage ? `<p class="sum">${esc(j.stage)}</p>` : ''}
+        <ul class="facts">${j.timeline.map((st) => `<li><span class="muted">${esc(ROLE_TH[st.role] || st.role)}</span><span>${esc(st.stage)} · ${st.done ? 'เสร็จ' : st.role === j.role && j.status !== 'done' ? '<b>กำลังทำ</b>' : esc(st.eta || 'รอคิว')}</span></li>`).join('')}</ul>
+      </article>` : '';
+    $('reportList').innerHTML = live + (S.reports.length ? S.reports.map((r, idx) => {
       const R = parseReport(r.text), key = r.jobId || r.title || idx, isOpen = openRep[key] ?? idx === 0;
       const facts = [R.file && `<li><span class="muted">ไฟล์</span>${esc(R.file)}</li>`, R.shots && `<li><span class="muted">งาน</span>${esc(R.shots)}</li>`]
         .concat(R.rest.map(([k, v]) => `<li><span class="muted">${esc(k)}</span>${esc(v)}</li>`)).filter(Boolean).join('');
@@ -7356,7 +7375,7 @@ nav.tabs button[aria-selected="true"] { color: #ffffff; background: #0a6fc9; }
         ${isOpen ? `${tokenBar(R.token)}${facts ? `<ul class="facts">${facts}</ul>` : ''}${R.raw ? `<p class="plain">${esc(R.raw)}</p>` : ''}` : ''}
         ${(facts || R.token || R.raw) ? `<button class="more" data-rep="${esc(String(key))}">${isOpen ? 'ซ่อนรายละเอียด' : 'ดูรายละเอียด'}</button>` : ''}
       </article>`;
-    }).join('') : `<div class="card empty">ยังไม่มีรายงาน — ผู้อำนวยการจะสรุปงานที่นี่ทุกครั้งที่จบงาน</div>`;
+    }).join('') : (live ? '' : `<div class="card empty">ยังไม่มีรายงาน — ผู้อำนวยการจะสรุปงานที่นี่ทุกครั้งที่จบงาน</div>`));
     $('lessonList').innerHTML = S.lessons.length ? S.lessons.map((l) => `<div class="lesson"><div class="row"><span class="pill">${esc(ROLE_TH[l.role] || l.role || 'ทั้งทีม')}</span><span class="muted tnum">${esc(fmtDate(l.date))}</span></div><div>${esc(l.text)}</div></div>`).join('')
       : `<div class="muted">ยังไม่มีบทเรียนใหม่ — สั่ง <b>/remember</b> เมื่อต้องการให้ทีมจำเรื่องใด</div>`;
   }
@@ -7374,7 +7393,7 @@ nav.tabs button[aria-selected="true"] { color: #ffffff; background: #0a6fc9; }
     const mark = (snap) => { if (!snap.metadata || !snap.metadata.fromCache) { S.connected = true; clearTimeout(timer); $('sync').textContent = 'อัปเดตสด'; } };
     const err = () => { clearTimeout(timer); $('sync').textContent = 'เชื่อมต่อข้อมูลไม่ได้'; };
     const rows = (snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-    db.collection('jobs').orderBy('updated', 'desc').limit(1).onSnapshot((s) => { mark(s); S.job = rows(s)[0] || null; renderJob(); onJob(); }, err);
+    db.collection('jobs').orderBy('updated', 'desc').limit(1).onSnapshot((s) => { mark(s); S.job = rows(s)[0] || null; renderJob(); renderReports(); onJob(); }, err);
     db.collection('library').orderBy('created', 'desc').limit(200).onSnapshot((s) => { mark(s); S.library = rows(s); renderLibrary(); }, err);
     db.collection('reports').orderBy('date', 'desc').limit(20).onSnapshot((s) => { mark(s); S.reports = rows(s); renderReports(); }, err);
     db.collection('lessons').orderBy('date', 'desc').limit(10).onSnapshot((s) => { mark(s); S.lessons = rows(s); renderReports(); }, err);
