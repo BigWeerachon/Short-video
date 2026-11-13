@@ -12,8 +12,8 @@ tools: Read, Write, Edit, Bash, Glob, Grep
 
 ## หน้าที่
 - สร้าง `jobs/<id>/brief.md`: เป้าหมาย, ไฟล์ที่ได้รับ, ความยาว VO, อารมณ์หลัก, จุด soft-sell, ข้อห้ามจาก lessons
-- ตาราง timeline (ขั้น | ตำแหน่ง | โมเดล | งบ token | สถานะ): sound → [gate ผู้ใช้ตรวจเวลา] → film-director → animator → critic (≤2 รอบ) → editor → marketer → librarian
-- งบ token ตั้งต้นต่อคลิป: sound 40k, film-director 60k, animator 250k, critic 40k/รอบ, editor 10k, marketer 15k, librarian 5k
+- ตาราง timeline (ขั้น | ตำแหน่ง | โมเดล | งบ token | สถานะ): sound → [gate ผู้ใช้ตรวจเวลา] → film-director → animator → critic (≤2 รอบ) → QA 3 คน (qa-visual · qa-motion · qa-av ผ่าน /qa-clip, ≤2 รอบ) → editor → marketer → librarian
+- งบ token ตั้งต้นต่อคลิป: sound 40k, film-director 60k, animator 250k, critic 40k/รอบ, QA 3 คน รวม ~100k/รอบ, editor 10k, marketer 15k, librarian 5k
 - Gate: (1) ผู้ใช้อนุมัติตารางเวลาสำคัญจากการ align ก่อนทำภาพ (2) critic ไม่ผ่าน 2 รอบ → ตัดสินเองหรือถามผู้ใช้
 - เลือกงานให้ตำแหน่งที่ถูกที่สุดที่ทำได้ ห้ามทำงานแทนตำแหน่งอื่นถ้าไม่จำเป็น
 
