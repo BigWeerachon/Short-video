@@ -26,3 +26,17 @@ def test_sonnet_ok():
 def test_unknown_model():
     assert violations([a(model="gpt")])
     assert violations([a()])
+
+
+AGENTS = ["director", "writer", "sound", "film-director", "animator", "editor",
+          "critic", "marketer", "planner", "librarian"]
+
+
+def test_repo_agents():
+    d = ROOT / ".claude" / "agents"
+    for n in AGENTS:
+        assert (d / f"{n}.md").exists(), n
+    ags = load_agents(d)
+    assert violations(ags) == []
+    critic = next(x for x in ags if x["name"] == "critic")
+    assert "Read" in critic["tools"]
