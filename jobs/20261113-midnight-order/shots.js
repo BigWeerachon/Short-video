@@ -111,7 +111,14 @@ export default function (S) {
     drawChar(ctx, 'rider', { x: 480 - on(t, TW(18, 'หันกลับ'), 1) * 40, y: 1800, scale: 2.3, expr: 'scared', talk: true });
   });
   // 16–17 กระจกหลัง: ว่าง → ผีโผล่
-  const mirror = (ctx, t, g) => { sky(ctx, 'roadNight'); mirrorView(ctx, { x: 540, y: 820, w: 860, h: 620 }, (c) => { roadNight(c, { t, roadY: 1250 }); if (g) drawChar(c, 'ghost', { x: 540, y: 1650, scale: 2.4, smile: 0.5 }); }); };
+  const mirror = (ctx, t, g) => {
+    sky(ctx, 'roadNight'); mirrorView(ctx, { x: 540, y: 820, w: 860, h: 620 }, (c) => { roadNight(c, { t, roadY: 1250 }); });
+    if (!g) return;
+    ctx.save(); ctx.beginPath(); ctx.ellipse(540, 820, 430, 310, 0, 0, Math.PI * 2); ctx.clip();
+    const k = prog(t, T(19), 0.2);
+    drawChar(ctx, 'ghost', { x: 540, y: 1180 + (1 - k) * 200, scale: 1.4, smile: 1 });
+    ctx.restore();
+  };
   shot(TW(18, 'กระจก'), (ctx, lt, t) => mirror(ctx, t, false));
   shot(T(19), (ctx, lt, t) => mirror(ctx, t, true), { cam: (lt) => ({ x: 540, y: 960, zoom: 1.04, shake: lt < 0.6 }) });
   // 18 ผีลอยตาม
@@ -142,10 +149,11 @@ export default function (S) {
   shot(T(24), (ctx, lt, t) => {
     house(ctx, t);
     const after = t > TW(24, 'ขากลับ');
+    ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.beginPath(); ctx.ellipse(after ? 470 : 520, 1500, 90, 16, 0, 0, Math.PI * 2); ctx.fill();
     motorcycle(ctx, { x: 230, y: 1500, s: 0.8, light: false, t: 0 });
     if (!after) drawChar(ctx, 'rider', { x: 520, y: 1500, scale: 1.4, expr: 'sweat', arms: { r: { x: 110, y: -170, bend: 'down' } }, shiver: 0.6, talk: true });
     else drawChar(ctx, 'rider', { x: 470, y: 1500, scale: 1.4, expr: 'pale', shiver: 1.2, talk: true });
-    if (!after) { ctx.fillStyle = '#16b85a'; ctx.fillRect(520 + 110 * 1.4 - 40, 1500 - 170 * 1.4 - 70, 80, 70); }
+    if (!after) { ctx.fillStyle = '#16b85a'; ctx.fillRect(520 + 110 * 1.4 - 45, 1500 - 170 * 1.4 - 50, 90, 70); ctx.fillStyle = '#f6c9a2'; ctx.beginPath(); ctx.arc(520 + 154, 1500 - 238, 13 * 1.4, 0, Math.PI * 2); ctx.fill(); }
   });
   // 23 ไม่ไหว
   shot(T(25), (ctx, lt, t) => {
@@ -202,15 +210,15 @@ export default function (S) {
     hotelRoom(ctx, { t, cool: 1 });
     bed(ctx, { x: 540, y: 1600, w: 900 });
     const k = on(t, TW(37, 'ซุกตัว'), 0.5);
-    drawChar(ctx, 'rider', { x: 430, y: 1720, scale: 1.6, expr: 'smug' });
-    blanket(ctx, { x: 540, y: 1920, w: 900, top: 1450 - k * 185 });
+    drawChar(ctx, 'rider', { x: 430, y: 1720, scale: 1.6, expr: k < 1 ? 'scared' : 'happy' });
+    blanket(ctx, { x: 540, y: 1920, w: 900, top: 1450 - k * 120 });
   }, { cam: { x: 540, y: 1100, zoom: 1.2 } });
   // 32 หลับจนเช้า
   shot(T(38), (ctx, lt, t) => {
     hotelRoom(ctx, { t, dawn: on(t, TW(38, 'ฟ้าสว่าง'), 0.9) });
     bed(ctx, { x: 540, y: 1600, w: 900 });
-    drawChar(ctx, 'rider', { x: 430, y: 1720, scale: 1.6, expr: 'sleep' });
-    blanket(ctx, { x: 540, y: 1920, w: 900, top: 1265 });
+    drawChar(ctx, 'rider', { x: 430, y: 1720, scale: 1.6, expr: t > TW(38, 'ฟ้าสว่าง') ? 'happy' : 'sleep' });
+    blanket(ctx, { x: 540, y: 1920, w: 900, top: 1330 });
   });
   // 33 สอนใจ
   shot(T(39), (ctx, lt, t) => { studio(ctx, t, { bright: 1 }); narr(ctx, { expr: 'smug', arms: { r: 'up' } }); deskF(ctx); });
