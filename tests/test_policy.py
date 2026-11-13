@@ -40,3 +40,18 @@ def test_repo_agents():
     assert violations(ags) == []
     critic = next(x for x in ags if x["name"] == "critic")
     assert "Read" in critic["tools"]
+
+
+SKILLS = ["make-clip", "fix-clip", "captions", "post", "plan-week", "report", "remember"]
+
+
+def test_skills():
+    from check_policy import parse_frontmatter
+    d = ROOT / ".claude" / "skills"
+    for n in SKILLS:
+        fm = parse_frontmatter((d / n / "SKILL.md").read_text(encoding="utf-8"))
+        assert fm.get("name") == n and fm.get("description"), n
+    body = (d / "make-clip" / "SKILL.md").read_text(encoding="utf-8")
+    order = ["director", "sound", "GATE", "film-director", "animator", "critic", "editor", "marketer", "librarian", "report"]
+    pos = [body.index(k) for k in order]
+    assert pos == sorted(pos)
