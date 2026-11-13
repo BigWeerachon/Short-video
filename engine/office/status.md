@@ -11,3 +11,5 @@
 - จบงาน (librarian): `batch` ครั้งเดียว = update job (`status: done`) + set `library/<id>` (พร้อม captions) + set `reports/<jobId>`
 - บทเรียนใหม่ (librarian): set `lessons/<Lxx>` คู่กับการเพิ่มแถวใน `knowledge/lessons.md`
 - เมื่อโพสต์แล้ว: update `library/<id>` → `status`, `posted.<platform>`
+- วิดีโอ (≤15MB): อัปโหลดเข้าออฟฟิศด้วย Artifact tool `asset: true` (url = ออฟฟิศ, file_path = jobs/<id>/out.mp4) แล้ว update `library/<id>.video_url` = "/_blob/<id>" ที่ได้ — หน้าคลังงานจะมีปุ่ม "ดาวน์โหลดวิดีโอ"
+- ปุ่ม "โพสต์ที่ …" ในคลังงาน = คัดลอกแคปชั่น + เปิดหน้าอัปโหลด; ผู้ใช้กด "โพสต์แล้ว?" เองในหน้า → library.posted/status อัปเดตอัตโนมัติ (ไม่ต้องสั่ง /report posted)

@@ -75,7 +75,14 @@ h2 { font-family: var(--font-display); font-weight: 500; font-size: 17px; margin
 .seg button { font: inherit; font-size: 12.5px; font-weight: 500; border: 0; border-radius: 9px; padding: 7px 2px; background: transparent; color: var(--muted); cursor: pointer; }
 .seg button[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 0 rgba(0,0,0,.3); }
 .cap pre { margin: 0; white-space: pre-wrap; word-break: break-word; font-family: var(--font-body); font-size: 14.5px; line-height: 1.6; background: var(--bg); border-radius: 12px; padding: 12px 14px; max-height: 260px; overflow: auto; }
-.capfoot { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.capfoot { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.postrow { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+a.go { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 14px; border-radius: 12px; background: #0a6fc9; color: #fff; font-weight: 600; font-size: 15px; text-decoration: none; }
+a.go svg { width: 16px; height: 16px; }
+button.mark { font: inherit; font-size: 13px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--muted); cursor: pointer; }
+button.mark.on { border-color: color-mix(in srgb, var(--accent-2) 50%, transparent); color: var(--accent-2); }
+button.dl { font: inherit; font-size: 13px; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
+.steps3 { margin: 0; padding-left: 18px; color: var(--muted); font-size: 12.5px; }
 button.copy { font: inherit; font-size: 14px; font-weight: 600; padding: 9px 18px; border-radius: 11px; border: 0; background: linear-gradient(90deg, #0a6fc9, #13a9c4); color: #fff; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
 button.copy svg { width: 16px; height: 16px; }
 button.copy.done { background: var(--accent-2); color: #10261d; }
@@ -5996,6 +6003,12 @@ nav.tabs button[aria-selected="true"] { color: #ffffff; background: #0a6fc9; }
   const COPY_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg>';
   const CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>';
   const open = {}; // id → แพลตฟอร์มที่เลือก (ถ้าเปิดอยู่)
+  // หน้าอัปโหลดของแต่ละแพลตฟอร์ม (แนบไฟล์/แคปชั่นผ่านลิงก์ไม่ได้ — แพลตฟอร์มไม่อนุญาต)
+  const UPLOAD = { youtube: 'https://www.youtube.com/upload', facebook: 'https://business.facebook.com/latest/reels_composer',
+    tiktok: 'https://www.tiktok.com/tiktokstudio/upload', instagram: 'https://business.facebook.com/latest/reels_composer' };
+  const GO_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 17L17 7M9 7h8v8"/></svg>';
+  const DL_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>';
+  const HOW = { youtube: 'วางแคปชั่น: บรรทัดแรกเป็นชื่อ ที่เหลือเป็นคำอธิบาย', instagram: 'เลือก "แชร์ไปที่ Instagram" ในหน้าสร้าง Reels', facebook: 'เลือกเพจ PAAKIN ก่อนโพสต์', tiktok: 'วางแคปชั่นในช่องคำอธิบาย' };
   function renderChips() {
     const count = (k) => (k === 'all' ? S.library.length : S.library.filter((e) => e.type === k).length);
     $('typeChips').innerHTML = FILTERS.map(([k, th]) => `<button class="chip" id="f-${k}" aria-pressed="${S.filter === k}" data-f="${k}">${th}<span class="n">${count(k)}</span></button>`).join('');
@@ -6024,10 +6037,16 @@ nav.tabs button[aria-selected="true"] { color: #ffffff; background: #0a6fc9; }
           <div class="seg" role="tablist">${avail.map((p) => `<button role="tab" data-seg="${p}" data-id="${esc(e.id)}" aria-selected="${p === sel}">${PLAT_TH[p]}</button>`).join('')}</div>
           <pre>${esc(captionText(sel, e.captions[sel]))}</pre>
           <div class="capfoot"><span class="muted tnum">${captionText(sel, e.captions[sel]).length} ตัวอักษร</span><button class="copy" data-id="${esc(e.id)}" data-p="${sel}">${COPY_SVG}<span>คัดลอก</span></button></div>
+          <div class="postrow">
+            <a class="go" href="${UPLOAD[sel]}" target="_blank" rel="noopener" data-id="${esc(e.id)}" data-p="${sel}">${GO_SVG}<span>โพสต์ที่ ${PLAT_TH[sel]}</span></a>
+            <button class="mark ${e.posted && e.posted[sel] ? 'on' : ''}" data-mark="${sel}" data-id="${esc(e.id)}">${e.posted && e.posted[sel] ? '✓ โพสต์แล้ว' : 'โพสต์แล้ว?'}</button>
+          </div>
+          <ol class="steps3"><li>กดปุ่มน้ำเงิน: คัดลอกแคปชั่นให้ + เปิดหน้าอัปโหลด</li><li>เลือกไฟล์วิดีโอ${e.video_url ? ' (ดาวน์โหลดจากปุ่มด้านบน)' : ''} แล้ววางแคปชั่น — ${HOW[sel]}</li><li>กดโพสต์ แล้วกลับมากด "โพสต์แล้ว?"</li></ol>
         </div>` : '';
       return `<article class="card item">
         <div class="item-head"><div class="kind">${ICON[e.type] || ICON.story_clip}</div><div style="min-width:0"><h3>${esc(e.title)}</h3><div class="sub">${meta}</div></div><span class="pill ${esc(e.status)}">${STATUS_TH[e.status] || esc(e.status)}</span></div>
         <div class="plats">${plats}</div>
+        ${e.video_url ? `<div style="padding:0 14px"><button class="dl" data-dl="${esc(e.id)}">${DL_SVG}<span>ดาวน์โหลดวิดีโอ (.mp4)</span></button></div>` : ''}
         ${avail.length ? `<button class="toggle" data-toggle="${esc(e.id)}" aria-expanded="${!!sel}">${sel ? 'ซ่อนแคปชั่น' : 'ดูและคัดลอกแคปชั่น'}${CHEV}</button>${panel}` : '<div style="height:2px"></div>'}
       </article>`;
     }).join('');
@@ -6035,6 +6054,12 @@ nav.tabs button[aria-selected="true"] { color: #ffffff; background: #0a6fc9; }
   $('libList').addEventListener('click', (ev) => {
     const t = ev.target.closest('[data-toggle]');
     if (t) { const id = t.dataset.toggle, e = S.library.find((x) => x.id === id); open[id] = open[id] ? null : Object.keys(PLAT_TH).find((p) => e.captions[p]); renderLibrary(); return; }
+    const go = ev.target.closest('a.go');
+    if (go) { const e = S.library.find((x) => x.id === go.dataset.id); try { navigator.clipboard.writeText(captionText(go.dataset.p, e.captions[go.dataset.p])).catch(() => {}); } catch (_) {} go.querySelector('span').textContent = 'คัดลอกแคปชั่นแล้ว — วางในหน้าที่เปิด'; return; }
+    const mk = ev.target.closest('[data-mark]');
+    if (mk) { markPosted(mk.dataset.id, mk.dataset.mark, mk); return; }
+    const dl = ev.target.closest('[data-dl]');
+    if (dl) { downloadVideo(dl.dataset.dl, dl); return; }
     const sg = ev.target.closest('[data-seg]');
     if (sg) { open[sg.dataset.id] = sg.dataset.seg; renderLibrary(); return; }
     const b = ev.target.closest('button.copy'); if (!b) return;
@@ -6045,6 +6070,28 @@ nav.tabs button[aria-selected="true"] { color: #ffffff; background: #0a6fc9; }
     const fallback = () => { const pre = b.closest('.cap').querySelector('pre'); const r = document.createRange(); r.selectNodeContents(pre); const s = getSelection(); s.removeAllRanges(); s.addRange(r); label.textContent = 'เลือกข้อความแล้ว'; };
     try { navigator.clipboard.writeText(text).then(ok, fallback); } catch (err) { fallback(); }
   });
+
+  async function markPosted(id, plat, btn) {
+    const db = window.__db; const e = S.library.find((x) => x.id === id); if (!db || !e) return;
+    const on = !(e.posted && e.posted[plat]);
+    const posted = { ...(e.posted || {}), [plat]: on ? new Date().toISOString().slice(0, 10) : null };
+    const status = Object.values(posted).some(Boolean) ? 'posted' : 'ready';
+    btn.disabled = true;
+    try { await db.collection('library').doc(id).update({ posted, status }); }
+    catch (err) { btn.textContent = 'บันทึกไม่ได้ (ไม่มีสิทธิ์แก้)'; }
+    btn.disabled = false;
+  }
+  async function downloadVideo(id, btn) {
+    const e = S.library.find((x) => x.id === id); const label = btn.querySelector('span');
+    const dls = window.claude && window.claude.use ? await window.claude.use('downloads') : null;
+    if (!dls) { label.textContent = 'ดาวน์โหลดในหน้านี้ไม่ได้ — ใช้ไฟล์ในแชท'; return; }
+    try {
+      label.textContent = 'กำลังเตรียมไฟล์…';
+      const blob = await (await fetch(e.video_url)).blob();
+      await dls.save({ filename: (e.id || 'clip') + '.mp4', data: blob });
+      label.textContent = 'ดาวน์โหลดวิดีโอ (.mp4)';
+    } catch (err) { label.textContent = err && err.code === 'dismissed' ? 'ดาวน์โหลดวิดีโอ (.mp4)' : 'ดาวน์โหลดไม่สำเร็จ ลองอีกครั้ง'; }
+  }
 
   // ---------- รายงาน ----------
   function reportBody(text) {
@@ -6069,6 +6116,7 @@ nav.tabs button[aria-selected="true"] { color: #ffffff; background: #0a6fc9; }
     const timer = setTimeout(() => { if (!S.connected) $('sync').textContent = 'ยังเชื่อมต่อข้อมูลไม่ได้'; }, 10000);
     const db = window.claude && window.claude.use ? await window.claude.use('db') : null;
     if (!db) { clearTimeout(timer); $('sync').textContent = 'ออฟไลน์ (ไม่มีข้อมูล)'; return; }
+    window.__db = db;
     const mark = (snap) => { if (!snap.metadata || !snap.metadata.fromCache) { S.connected = true; clearTimeout(timer); $('sync').textContent = 'อัปเดตสด'; } };
     const err = () => { clearTimeout(timer); $('sync').textContent = 'เชื่อมต่อข้อมูลไม่ได้'; };
     const rows = (snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }));
