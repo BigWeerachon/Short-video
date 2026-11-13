@@ -391,8 +391,20 @@ export function phoneScreen(ctx, { x = W / 2, y = 900, s = 1, screen = 'order', 
   ctx.restore();
   if (tap) { // นิ้วแตะ + วงกระเพื่อม (ไม่นับจำนวน)
     ctx.fillStyle = `rgba(47,111,223,${0.35 * (1 - (tap.ring || 0))})`; dot(ctx, tap.x, tap.y, 20 + 40 * (tap.ring || 0), ctx.fillStyle);
-    R(ctx, tap.x - 18, tap.y, 36, 160, 18, '#f6c9a2'); dot(ctx, tap.x, tap.y + 8, 18, '#f6c9a2');
+    pointHand(ctx, tap.x, tap.y, 1 - 0.12 * Math.sin(Math.PI * (tap.ring || 0)));
   }
+  ctx.restore();
+}
+// มือชี้: ปลายนิ้วชี้อยู่ที่จุดแตะ เอียงมาจากล่างขวา
+function pointHand(ctx, x, y, press = 1) {
+  const skin = '#f6c9a2', shade = '#e0a97f';
+  ctx.save(); ctx.translate(x, y); ctx.rotate(-0.45); ctx.scale(press, press);
+  R(ctx, -14, 0, 28, 80, 14, skin);                 // นิ้วชี้
+  R(ctx, -9, 4, 18, 20, 8, '#fde3d0');              // เล็บ
+  R(ctx, -34, 60, 82, 86, 30, skin);                // กำปั้น
+  R(ctx, 12, 64, 26, 34, 12, shade); R(ctx, 12, 96, 26, 30, 12, shade); // นิ้วงอ
+  R(ctx, -44, 84, 30, 50, 14, shade);               // นิ้วโป้ง
+  R(ctx, -22, 140, 60, 70, 16, skin);               // ข้อมือ
   ctx.restore();
 }
 export function pin(ctx, x, y, color = '#ff4d6d', s = 1) {
