@@ -6,4 +6,6 @@ export const CAST = {
   twinA: { name: 'แฝดพี่', shirt: '#f59e0b', pants: '#5b3f2a', hair: 'spiky', hairColor: '#2a2230', size: 0.92, seed: 0.7 },
   twinB: { name: 'แฝดน้อง', shirt: '#f59e0b', pants: '#5b3f2a', hair: 'cap', hairColor: '#2a2230', cap: '#3b82f6', size: 0.92, seed: 1.7 },
   nat: { name: 'นัท', shirt: '#f4f4f6', pants: '#3a3f55', hair: 'neat', hairColor: '#2a2230', tie: '#3b82f6', glasses: '#1f1f28', seed: 2.9 },
+  rider: { name: 'พี่ไรเดอร์', shirt: '#16b85a', pants: '#2f3550', hair: 'short', hairColor: '#2a2230', helmet: '#16b85a', seed: 3.4 },
+  ghost: { name: 'ผีชุดขาว', type: 'ghost', seed: 4.1 },
 };

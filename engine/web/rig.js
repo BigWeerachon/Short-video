@@ -1,7 +1,7 @@
 // ตัวละคร 2D flat vector + 2-bone IK (คู่มือขั้นที่ 3, lessons L03 L04 L05 L06)
 import { CAST } from './cast.js';
 
-export const EXPRS = ['happy', 'smug', 'scared', 'shock', 'sad', 'cry', 'laugh', 'pale', 'angry', 'sleep'];
+export const EXPRS = ['happy', 'smug', 'scared', 'shock', 'sad', 'cry', 'laugh', 'pale', 'angry', 'sleep', 'swirl', 'sweat'];
 export const SKIN = '#f6c9a2';
 export const SHOE = '#3a3350';
 
@@ -58,9 +58,20 @@ const DEF = { x: 540, y: 1500, scale: 1, dir: 1, expr: 'happy', talk: false, mod
  * วาดตัวละคร — origin = กึ่งกลางเท้า
  * pose: {x,y,scale,dir,expr,talk,mode:'stand'|'sit'|'walk'|'sleep',arms:{l,r},walkPhase,prop,armsFront}
  */
+/** บันทึกการวาดตัวละครทุกครั้งสำหรับทีม QA (เปิดเฉพาะตอนตรวจ) */
+export const qaLog = { on: false, items: [] };
+
 export function drawChar(ctx, castId, pose = {}) {
   const c = CAST[castId];
   if (!c) throw new Error(`ไม่มีตัวละคร ${castId}`);
+  if (qaLog.on) {
+    const m = ctx.getTransform ? ctx.getTransform() : null;
+    const pt = m ? m.transformPoint({ x: pose.x ?? DEF.x, y: pose.y ?? DEF.y }) : { x: pose.x, y: pose.y };
+    const k = (m ? Math.hypot(m.a, m.b) : 1) * (pose.scale ?? 1) * (c.size || 1);
+    qaLog.items.push({ cast: castId, x: Math.round(pt.x), y: Math.round(pt.y), h: Math.round(380 * k), talk: !!pose.talk,
+      expr: pose.expr || 'happy', mode: pose.mode || 'stand', flip: !!(pose.dir < 0) });
+  }
+  if (c.type === 'ghost') { drawGhost(ctx, pose); return; }
   const p = { ...DEF, ...pose, arms: { ...(pose.arms || {}) } };
   const t = clock.t + (c.seed || 0);
   ctx.save();
@@ -68,12 +79,14 @@ export function drawChar(ctx, castId, pose = {}) {
   ctx.scale(p.scale * (c.size || 1), p.scale * (c.size || 1));
   if (p.mode === 'sleep') { drawSleeping(ctx, c, t); ctx.restore(); return; }
   const bw = c.width || 1;
-  const sitDrop = p.mode === 'sit' ? 62 : 0;
+  const sitDrop = p.mode === 'sit' || p.mode === 'ride' ? 62 : 0;
+  if (p.shiver) ctx.translate(Math.sin(clock.t * 60) * 4 * p.shiver, 0);
   const breath = Math.sin(t * 2.1) * 1.6;
   const Y = (y) => y + sitDrop - (y < -100 ? breath * ((-100 - y) / 200) : 0);
 
   // ขา
   if (p.mode === 'sit') drawSitLegs(ctx, c, bw);
+  else if (p.mode === 'ride') drawRideLegs(ctx, c, p.dir);
   else if (p.mode === 'walk') drawWalkLegs(ctx, c, bw, p);
   else drawStandLegs(ctx, c, bw);
 
@@ -87,6 +100,7 @@ export function drawChar(ctx, castId, pose = {}) {
   const arms = {};
   for (const [k, side] of [['l', -1], ['r', 1]]) {
     let tg = armTarget(p.arms[k], side, t);
+    if (p.mode === 'ride' && !p.arms[k]) tg = { x: p.dir * (k === (p.dir > 0 ? 'r' : 'l') ? 120 : 95), y: -190, bend: 'down' };
     if (p.mode === 'walk' && !p.arms[k]) {
       const sw = Math.sin(p.walkPhase + (side > 0 ? 0 : Math.PI)) * 26;
       tg = { x: side * 34 + sw * p.dir, y: -112, bend: 'down' };
@@ -108,6 +122,10 @@ export function drawChar(ctx, castId, pose = {}) {
   ctx.quadraticCurveTo(48 * bw, Y(-150), 40 * bw, Y(-92));
   ctx.lineTo(-40 * bw, Y(-92)); ctx.quadraticCurveTo(-48 * bw, Y(-150), -44 * bw, Y(-218));
   ctx.fill();
+  if (c.helmet) { // แจ็กเก็ตไรเดอร์: ซิปกลาง + แถบสะท้อนแสง
+    ctx.fillStyle = shade(c.shirt, 0.25); ctx.fillRect(-3, Y(-214), 6, 118);
+    ctx.fillStyle = '#fff36b'; ctx.fillRect(-44 * bw, Y(-150), 88 * bw, 10);
+  }
   if (c.tie) {
     ctx.fillStyle = '#ffffff';
     ctx.beginPath(); ctx.moveTo(-16, Y(-218)); ctx.lineTo(0, Y(-196)); ctx.lineTo(16, Y(-218)); ctx.fill();
@@ -188,8 +206,10 @@ function drawHead(ctx, c, p, t, cy) {
   if (p.expr === 'angry') { ctx.fillStyle = 'rgba(230,80,60,0.18)'; ctx.beginPath(); ctx.ellipse(0, cy, 64, 72, 0, 0, Math.PI * 2); ctx.fill(); }
   // หู
   ctx.fillStyle = SKIN; circle(ctx, -63, cy + 4, 11); circle(ctx, 63, cy + 4, 11);
-  drawHair(ctx, c, cy);
+  if (c.helmet) drawHelmetBack(ctx, c, cy); else drawHair(ctx, c, cy);
   drawFace(ctx, c, p, t, cy);
+  if (c.helmet) drawHelmetFront(ctx, c, cy);
+  if (p.goose) drawGoose(ctx, p.goose, t);
   if (c.glasses) {
     ctx.strokeStyle = c.glasses; ctx.lineWidth = 5;
     roundRectPath(ctx, -44, cy - 14, 34, 26, 7); ctx.stroke();
@@ -233,11 +253,15 @@ function drawFace(ctx, c, p, t, cy) {
   const e = p.expr || 'happy';
   ctx.fillStyle = '#2b2233'; ctx.strokeStyle = '#2b2233'; ctx.lineCap = 'round'; ctx.lineWidth = 5;
   // ตา
-  if (e === 'sleep' || (blink && !['laugh', 'shock'].includes(e))) {
+  if (e === 'swirl') {
+    ctx.lineWidth = 3.5;
+    for (const s of [-1, 1]) { ctx.beginPath(); for (let a = 0; a < 14; a += 0.3) { const r = 1 + a * 0.9; const aa = a + t * 8 * s; ctx.lineTo(s * ex + Math.cos(aa) * r, ey + Math.sin(aa) * r); } ctx.stroke(); }
+    ctx.lineWidth = 5;
+  } else if (e === 'sleep' || (blink && !['laugh', 'shock'].includes(e))) {
     for (const s of [-1, 1]) line(ctx, { x: s * ex - 9, y: ey }, { x: s * ex + 9, y: ey });
   } else if (e === 'laugh') {
     for (const s of [-1, 1]) { ctx.beginPath(); ctx.arc(s * ex, ey + 4, 9, Math.PI * 1.1, Math.PI * 1.9); ctx.stroke(); }
-  } else if (['scared', 'shock', 'pale'].includes(e)) {
+  } else if (['scared', 'shock', 'pale', 'sweat'].includes(e)) {
     for (const s of [-1, 1]) {
       ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.ellipse(s * ex, ey, 13, 15, 0, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#2b2233'; circle(ctx, s * ex, ey + 1, 5);
@@ -249,7 +273,7 @@ function drawFace(ctx, c, p, t, cy) {
   }
   // คิ้ว
   ctx.lineWidth = 4.5;
-  const brow = { angry: [8, -1], sad: [-7, 1], cry: [-7, 1], scared: [-6, 1], pale: [-6, 1], shock: [0, 1] }[e];
+  const brow = { sweat: [-6, 1], angry: [8, -1], sad: [-7, 1], cry: [-7, 1], scared: [-6, 1], pale: [-6, 1], shock: [0, 1] }[e];
   if (brow) for (const s of [-1, 1]) line(ctx, { x: s * ex - 11, y: ey - 22 + (s < 0 ? brow[0] : -brow[0]) * 0.5 }, { x: s * ex + 11, y: ey - 22 - (s < 0 ? brow[0] : -brow[0]) * 0.5 });
   // แก้ม
   if (['happy', 'laugh', 'smug'].includes(e)) { ctx.fillStyle = 'rgba(240,120,130,0.35)'; circle(ctx, -40, cy + 18, 10); circle(ctx, 40, cy + 18, 10); }
@@ -260,7 +284,8 @@ function drawFace(ctx, c, p, t, cy) {
   if (open > 1.5) { ctx.beginPath(); ctx.ellipse(0, my, 11 + open * 0.2, open * 0.6 + 2, 0, 0, Math.PI * 2); ctx.fill(); }
   else if (e === 'laugh') { ctx.beginPath(); ctx.arc(0, my - 4, 16, 0, Math.PI); ctx.fill(); }
   else if (e === 'shock') { ctx.beginPath(); ctx.ellipse(0, my, 10, 13, 0, 0, Math.PI * 2); ctx.fill(); }
-  else if (['scared', 'pale'].includes(e)) { ctx.beginPath(); ctx.moveTo(-12, my); for (let i = -12; i <= 12; i += 6) ctx.lineTo(i, my + (i / 6) % 2 * 3); ctx.stroke(); }
+  else if (e === 'swirl') { ctx.beginPath(); ctx.ellipse(0, my, 9, 6, 0, 0, Math.PI * 2); ctx.fill(); }
+  else if (['scared', 'pale', 'sweat'].includes(e)) { ctx.beginPath(); ctx.moveTo(-12, my); for (let i = -12; i <= 12; i += 6) ctx.lineTo(i, my + (i / 6) % 2 * 3); ctx.stroke(); }
   else if (['sad', 'cry', 'angry'].includes(e)) { ctx.beginPath(); ctx.arc(0, my + 10, 12, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke(); }
   else if (e === 'smug') { ctx.beginPath(); ctx.moveTo(-8, my); ctx.quadraticCurveTo(6, my + 6, 14, my - 4); ctx.stroke(); }
   else if (e === 'sleep') { line(ctx, { x: -5, y: my }, { x: 5, y: my }); }
@@ -271,6 +296,7 @@ function drawFace(ctx, c, p, t, cy) {
     const k = (t * 1.5) % 1;
     for (const s of [-1, 1]) { roundRectPath(ctx, s * ex - 4, ey + 8, 8, 30 + k * 20, 4); ctx.fill(); }
   }
+  if (e === 'sweat') { ctx.fillStyle = 'rgba(110,180,240,0.9)'; for (const [sx, sy, ph] of [[-58, -20, 0], [60, -34, 0.5], [50, 0, 0.25]]) { const k = (t * 1.3 + ph) % 1; ctx.beginPath(); ctx.ellipse(sx, cy + sy + k * 30, 6, 9, 0, 0, Math.PI * 2); ctx.fill(); } }
   if (['scared', 'pale'].includes(e)) { ctx.fillStyle = 'rgba(110,180,240,0.9)'; ctx.beginPath(); ctx.ellipse(56, cy - 30, 6, 9, 0, 0, Math.PI * 2); ctx.fill(); }
   if (e === 'sleep') { ctx.fillStyle = '#ffffff'; ctx.font = '700 28px Kanit'; ctx.fillText('z', 60, cy - 60 - (t * 10) % 20); }
 }
@@ -306,4 +332,93 @@ export function roundRectPath(ctx, x, y, w, h, r) {
   ctx.beginPath();
   ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
   ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+
+// ---- ไรเดอร์: ขาบนรถ + หมวกกันน็อก ----
+function drawRideLegs(ctx, c, dir) {
+  ctx.lineCap = 'round'; ctx.strokeStyle = c.pants; ctx.lineWidth = 26;
+  for (const off of [-10, 10]) {
+    const hip = { x: off, y: -36 }, knee = { x: dir * 62 + off * 0.4, y: -44 }, foot = { x: dir * 70 + off * 0.4, y: 22 };
+    line(ctx, hip, knee); line(ctx, knee, foot);
+    shoe(ctx, foot.x + dir * 6, foot.y + 6, dir);
+  }
+}
+function drawHelmetBack(ctx, c, cy) {
+  ctx.fillStyle = c.helmet;
+  ctx.beginPath(); ctx.ellipse(0, cy - 6, 80, 88, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = SKIN; ctx.beginPath(); ctx.ellipse(0, cy + 8, 52, 56, 0, 0, Math.PI * 2); ctx.fill();
+}
+function drawHelmetFront(ctx, c, cy) {
+  ctx.fillStyle = shade(c.helmet, 0.12);
+  ctx.beginPath(); ctx.ellipse(0, cy - 44, 80, 50, 0, Math.PI, 0); ctx.fill();
+  ctx.fillStyle = 'rgba(190,230,255,0.55)'; // ชิลด์ใสเปิดขึ้น
+  roundRectPath(ctx, -62, cy - 84, 124, 34, 16); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.7)'; roundRectPath(ctx, -40, cy - 78, 36, 8, 4); ctx.fill();
+  ctx.fillStyle = c.helmet; roundRectPath(ctx, -80, cy + 30, 22, 46, 10); ctx.fill(); roundRectPath(ctx, 58, cy + 30, 22, 46, 10); ctx.fill();
+}
+function drawGoose(ctx, k, t) { // ขนลุก: ขีดสั้นๆ รอบตัว
+  ctx.strokeStyle = `rgba(255,255,255,${0.8 * k})`; ctx.lineWidth = 4; ctx.lineCap = 'round';
+  for (const [x, y, a] of [[-98, -200, 3.6], [-108, -150, 3.2], [98, -200, -0.5], [108, -150, 0]]) {
+    const j = Math.sin(t * 30 + x) * 3;
+    line(ctx, { x: x + j, y }, { x: x + j + Math.cos(a) * 14, y: y + Math.sin(a) * 14 });
+  }
+}
+
+// ---- ผีสาวชุดขาว (การ์ตูนตลก ไม่สยดสยอง) ----
+/** pose: {x,y,scale,smile:0..1,wave:bool,tilt:rad,blow:0..1,alpha} origin = ปลายชุด */
+export function drawGhost(ctx, pose = {}) {
+  const { x = 540, y = 1500, scale = 1, smile = 0, wave = false, tilt = 0, blow = 0, alpha = 1 } = pose;
+  const t = clock.t;
+  const bob = Math.sin(t * 2.4) * 12;
+  ctx.save(); ctx.globalAlpha *= alpha;
+  ctx.translate(x, y + bob); ctx.scale(scale, scale);
+  // เงาลอย
+  ctx.fillStyle = 'rgba(0,0,0,0.18)'; ctx.beginPath(); ctx.ellipse(0, 40 - bob, 70, 14, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.rotate(tilt * 0.3);
+  // ผมด้านหลัง
+  ctx.fillStyle = '#1b1726';
+  ctx.beginPath(); ctx.moveTo(-70, -330); ctx.quadraticCurveTo(-95 - blow * 60, -200, -80 - blow * 90, -120); ctx.lineTo(80 - blow * 40, -120); ctx.quadraticCurveTo(95, -200, 70, -330); ctx.fill();
+  // ชุดยาว ปลายคลื่น
+  ctx.fillStyle = '#f7f8ff';
+  ctx.beginPath(); ctx.moveTo(-46, -220); ctx.lineTo(46, -220); ctx.quadraticCurveTo(80, -100, 92, 0);
+  for (let i = 0; i <= 6; i++) { const xx = 92 - i * 30.6; ctx.lineTo(xx, 8 + Math.sin(t * 5 + i * 1.3) * 10 + (i % 2) * 10); }
+  ctx.quadraticCurveTo(-80, -100, -46, -220); ctx.fill();
+  ctx.fillStyle = '#dfe3f5'; ctx.beginPath(); ctx.moveTo(-10, -200); ctx.quadraticCurveTo(-20, -90, -30, 0); ctx.lineTo(-12, 0); ctx.quadraticCurveTo(-4, -100, -10, -200); ctx.fill();
+  // แขน
+  ctx.lineCap = 'round';
+  const shL = { x: -42, y: -205 }, shR = { x: 42, y: -205 };
+  const wv = Math.sin(t * 3) * 22;
+  const hR = wave ? { x: 110 + wv, y: -320 } : { x: 56, y: -110 };
+  const armR = ik2(shR, hR, 55, 52, wave ? 1 : -1);
+  const armL = ik2(shL, { x: -56, y: -110 }, 55, 52, 1);
+  for (const a of [armL, armR]) {
+    ctx.strokeStyle = '#eceffd'; ctx.lineWidth = 24; line(ctx, a === armL ? shL : shR, a.elbow); line(ctx, a.elbow, a.hand);
+    ctx.fillStyle = '#cfe6f5'; circle(ctx, a.hand.x, a.hand.y, 12);
+  }
+  // หัว
+  ctx.save(); ctx.translate(0, -292); ctx.rotate(tilt);
+  ctx.fillStyle = '#cfe6f5'; ctx.beginPath(); ctx.ellipse(0, 0, 62, 70, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#1b1726';
+  ctx.beginPath(); ctx.ellipse(0, -18, 70, 60, 0, Math.PI, 0); ctx.fill();
+  if (smile > 0) {
+    // แหวกผมสองข้าง เห็นหน้า: ตากลม แก้มชมพู ยิ้มกว้าง ฟันขาวเรียบ
+    ctx.fillStyle = '#1b1726';
+    roundRectPath(ctx, -78, -24, 26, 120, 13); ctx.fill(); roundRectPath(ctx, 52, -24, 26, 120, 13); ctx.fill();
+    ctx.fillStyle = '#2b2233'; circle(ctx, -22, -6, 8); circle(ctx, 22, -6, 8);
+    ctx.fillStyle = '#fff'; circle(ctx, -20, -9, 3); circle(ctx, 24, -9, 3);
+    ctx.fillStyle = 'rgba(245,130,160,0.55)'; circle(ctx, -40, 18, 11); circle(ctx, 40, 18, 11);
+    const mw = 22 + 34 * smile;
+    ctx.fillStyle = '#7a2b3a';
+    ctx.beginPath(); ctx.moveTo(-mw, 16); ctx.quadraticCurveTo(0, 30 + 34 * smile, mw, 16); ctx.quadraticCurveTo(0, 24, -mw, 16); ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.moveTo(-mw * 0.92, 18); ctx.quadraticCurveTo(0, 26, mw * 0.92, 18); ctx.quadraticCurveTo(0, 32 + 10 * smile, -mw * 0.92, 18); ctx.fill();
+  } else {
+    // ผมปิดหน้า เห็นแค่ตากลมจุดขาว
+    ctx.beginPath(); ctx.moveTo(-70, -20);
+    for (let i = 0; i <= 7; i++) ctx.lineTo(-70 + i * 20, 70 + (i % 2) * 14 + Math.sin(t * 3 + i) * 3 + blow * (i * 4));
+    ctx.lineTo(70, -20); ctx.fill();
+    ctx.fillStyle = '#ffffff'; circle(ctx, -22, 2, 7); circle(ctx, 22, 2, 7);
+  }
+  ctx.restore();
+  ctx.restore();
 }
