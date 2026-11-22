@@ -7,5 +7,8 @@ export const CAST = {
   twinB: { name: 'แฝดน้อง', shirt: '#f59e0b', pants: '#5b3f2a', hair: 'cap', hairColor: '#2a2230', cap: '#3b82f6', size: 0.92, seed: 1.7 },
   nat: { name: 'นัท', shirt: '#f4f4f6', pants: '#3a3f55', hair: 'neat', hairColor: '#2a2230', tie: '#3b82f6', glasses: '#1f1f28', seed: 2.9 },
   rider: { name: 'พี่ไรเดอร์', shirt: '#16b85a', pants: '#2f3550', hair: 'short', hairColor: '#2a2230', helmet: '#16b85a', seed: 3.4 },
+  owner: { name: 'เจ้าของโรงแรม', shirt: '#1e2a5a', pants: '#1e2a5a', hair: 'neat', hairColor: '#2a2230', tie: '#f6b860', suit: true, seed: 5.2 },
+  reception: { name: 'พนักงานต้อนรับ', shirt: '#38bdf8', pants: '#1e2a5a', hair: 'long', hairColor: '#3a2620', badge: '#ffffff', seed: 6.3 },
+  traveler: { name: 'นักท่องเที่ยว', shirt: '#f4f4f6', pants: '#1e2a5a', hair: 'short', hairColor: '#4a3020', backpack: '#f6b860', seed: 7.4 },
   ghost: { name: 'ผีชุดขาว', type: 'ghost', seed: 4.1 },
 };

@@ -90,6 +90,8 @@ export function drawChar(ctx, castId, pose = {}) {
   else if (p.mode === 'walk') drawWalkLegs(ctx, c, bw, p);
   else drawStandLegs(ctx, c, bw);
 
+  // เป้สะพายหลัง (โผล่สองข้างลำตัว)
+  if (c.backpack) { ctx.fillStyle = c.backpack; roundRectPath(ctx, -58 * bw, Y(-210), 116 * bw, 120, 26); ctx.fill(); }
   // ผมยาวด้านหลัง
   if (c.hair === 'long') {
     ctx.fillStyle = c.hairColor;
@@ -132,6 +134,13 @@ export function drawChar(ctx, castId, pose = {}) {
     ctx.fillStyle = c.tie;
     ctx.beginPath(); ctx.moveTo(-6, Y(-206)); ctx.lineTo(6, Y(-206)); ctx.lineTo(9, Y(-140)); ctx.lineTo(0, Y(-128)); ctx.lineTo(-9, Y(-140)); ctx.fill();
   }
+  if (c.suit) { // สูท: ปกเสื้อทับเชิ้ต (วาดหลังเนกไท)
+    ctx.fillStyle = shade(c.shirt, 0.2);
+    ctx.beginPath(); ctx.moveTo(-26, Y(-218)); ctx.lineTo(-10, Y(-150)); ctx.lineTo(-34, Y(-190)); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(26, Y(-218)); ctx.lineTo(10, Y(-150)); ctx.lineTo(34, Y(-190)); ctx.fill();
+  }
+  if (c.backpack) { ctx.fillStyle = shade(c.backpack, 0.15); ctx.fillRect(-30 * bw, Y(-218), 12, 110); ctx.fillRect(18 * bw, Y(-218), 12, 110); }
+  if (c.badge) { ctx.fillStyle = c.badge; roundRectPath(ctx, 12 * bw, Y(-186), 26, 14, 4); ctx.fill(); }
   // หัว
   drawHead(ctx, c, p, t, Y(-292));
   // แขนหน้า (มือขึ้นหน้า → วาดทับหัว)
