@@ -1,21 +1,113 @@
-{"vo":"vo.mp3",
-"mutes":[[33.47,34.10]],
-"music":[
-{"mood":"cute","start":0.0,"end":11.88},
-{"mood":"science","start":11.88,"end":34.31},
-{"mood":"bright","start":34.31,"end":55.51},
-{"mood":"warm","start":55.51,"end":71.44},
-{"mood":"outro","start":71.44,"end":78.4}],
-"sfx":[
-{"name":"click","t":0.12,"gain":0.5},
-{"name":"click","t":11.9,"gain":0.5},
-{"name":"chime","t":18.06,"gain":0.45},
-{"name":"chime","t":31.0,"gain":0.45},
-{"name":"click","t":34.31,"gain":0.5},
-{"name":"chime","t":40.25,"gain":0.3},
-{"name":"click","t":46.9,"gain":0.6},
-{"name":"sparkle","t":47.3,"gain":0.5},
-{"name":"click","t":55.51,"gain":0.5},
-{"name":"chime","t":69.63,"gain":0.3},
-{"name":"sparkle","t":71.6,"gain":0.6},
-{"name":"chime","t":72.0,"gain":0.5}]}
+{
+ "vo": "vo.mp3",
+ "mutes": [
+  [
+   33.47,
+   34.1
+  ]
+ ],
+ "music": [
+  {
+   "mood": "ukulele",
+   "start": 0.0,
+   "end": 11.88,
+   "level": 0.4,
+   "bpm": 112,
+   "gain": 0.85
+  },
+  {
+   "mood": "ukulele",
+   "start": 11.88,
+   "end": 34.31,
+   "level": 0.3,
+   "bpm": 116,
+   "gain": 0.75
+  },
+  {
+   "mood": "ukulele",
+   "start": 34.31,
+   "end": 55.51,
+   "level": 0.95,
+   "bpm": 120,
+   "gain": 1.0
+  },
+  {
+   "mood": "ukulele",
+   "start": 55.51,
+   "end": 71.44,
+   "level": 0.2,
+   "bpm": 110,
+   "gain": 0.8
+  },
+  {
+   "mood": "ukulele",
+   "start": 71.44,
+   "end": 78.4,
+   "level": 0.9,
+   "bpm": 116,
+   "gain": 1.0
+  }
+ ],
+ "sfx": [
+  {
+   "name": "click",
+   "t": 0.12,
+   "gain": 0.5
+  },
+  {
+   "name": "click",
+   "t": 11.9,
+   "gain": 0.5
+  },
+  {
+   "name": "chime",
+   "t": 18.06,
+   "gain": 0.45
+  },
+  {
+   "name": "chime",
+   "t": 31.0,
+   "gain": 0.45
+  },
+  {
+   "name": "click",
+   "t": 34.31,
+   "gain": 0.5
+  },
+  {
+   "name": "chime",
+   "t": 40.25,
+   "gain": 0.3
+  },
+  {
+   "name": "click",
+   "t": 46.9,
+   "gain": 0.6
+  },
+  {
+   "name": "sparkle",
+   "t": 47.3,
+   "gain": 0.5
+  },
+  {
+   "name": "click",
+   "t": 55.51,
+   "gain": 0.5
+  },
+  {
+   "name": "chime",
+   "t": 69.63,
+   "gain": 0.3
+  },
+  {
+   "name": "sparkle",
+   "t": 71.6,
+   "gain": 0.6
+  },
+  {
+   "name": "chime",
+   "t": 72.0,
+   "gain": 0.5
+  }
+ ]
+}

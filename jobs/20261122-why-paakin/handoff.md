@@ -1,6 +1,5 @@
-# handoff (animator, fix-clip)
-- รวมช็อต 4+5 เป็นช็อตเดียว T(4)→T(7) (6.69–11.88) ฉาก navy ไม่มีตัดภาพ, owner x=220 คงที่
-- กราฟโตตั้งแต่ T(4)+0.3 เสร็จก่อน 'กำไร'; เหรียญไหลที่ 'กำไร'; ที่ 'แบรนด์' กราฟย่อ/เลื่อนซ้ายบน แล้วโล่แบรนด์ค่อยๆ ขึ้นขวาและจางลง
-- expr owner sweat→sad ที่ 'แบรนด์'; กล้องซูมช้าต่อเนื่อง; ลบช็อต 5 เดิม
-- ตรวจ: jobs/20261122-why-paakin/qa/fix45.jpg, fix45b.jpg; node --test web ผ่าน 11/11
-- ถัดไป: render out.mp4 ใหม่ แล้วส่ง critic ดูช่วง 6–12s
+# handoff (sound, fix-clip)
+- เพิ่มสไตล์ `ukulele` ใน engine/audio/music.py (Karplus-Strong GCEA, I-V-vi-IV, เบส + บล็อกไม้/ทิก tonal ไม่มี noise); พารามิเตอร์ต่อ segment: level, bpm, shift, gain
+- audio_plan.json: ukulele ทั้งคลิป level 0.4/0.3/0.95/0.2/0.9 ตามฉาก; คง mutes, sfx, ducking, เสียงปิด
+- mix.mp3 ยาว 78.28 วิ เท่าเดิม; pytest 66 ผ่าน
+- ถัดไป: ให้ผู้ใช้ฟังอนุมัติ แล้ว render out.mp4 ใหม่ (เสียงเปลี่ยน)
