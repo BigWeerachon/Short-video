@@ -52,21 +52,20 @@ export default function (S) {
     drawChar(ctx, 'owner', { x: 200, y: 1600, scale: 1.2, expr: t > T(3) ? 'sweat' : 'happy' });
   }, { cam: (lt) => ({ x: 540 + Math.min(lt, 2) * 20, y: 1100, zoom: 1.08 }), overlay: hold(H1) });
 
-  // 4 กราฟกำไร
+  // 4 กราฟกำไร + แบรนด์จาง (ช็อตเดียว T(4)→T(7) ไม่ตัดภาพ)
   shot(T(4), (ctx, lt, t) => {
     bizRoom(ctx, 'navy');
-    const k = on(t, TW(4, 'กำไร'), 0.8);
-    barChart(ctx, { x: 660, y: 1500, w: 560, h: 760, bars: [{ h: 0.95, color: '#6b7499' }, { h: 0.3, color: GOLD }], k });
-    for (let i = 0; i < 4; i++) { const u = ((t - TW(4, 'กำไร')) * 0.7 + i / 4) % 1; if (k > 0.5) { ctx.globalAlpha = 1 - u; coin(ctx, 860 + u * 160, 1260 - u * 420, 30); ctx.globalAlpha = 1; } }
-    drawChar(ctx, 'owner', { x: 220, y: 1600, scale: 1.2, expr: 'sweat', arms: { r: 'point' } });
-  }, { overlay: hold(H1) });
-
-  // 5 แบรนด์จาง
-  shot(T(5), (ctx, lt, t) => {
-    bizRoom(ctx, 'navy');
-    iconBrand(ctx, { x: 680, y: 1060, s: 1.2, fade: on(t, TW(5, 'แบรนด์'), 1.2) });
-    drawChar(ctx, 'owner', { x: 240, y: 1600, scale: 1.25, expr: 'sad' });
-  }, { cam: { x: 540, y: 1100, zoom: 1.05 }, overlay: hold(H1) });
+    const tg = TW(4, 'กำไร'), tb = TW(5, 'แบรนด์');
+    const g0 = T(4) + 0.3, k = on(t, g0, Math.max(0.6, tg - g0 - 0.1));
+    const m = on(t, tb, 0.9); // กราฟเลื่อน/ย่อขึ้นซ้ายบน
+    const s = 1 - 0.35 * m, gx = 660 - 180 * m, gy = 1500 - 230 * m;
+    ctx.save(); ctx.translate(gx, gy); ctx.scale(s, s);
+    barChart(ctx, { x: 0, y: 0, w: 560, h: 760, bars: [{ h: 0.95, color: '#6b7499' }, { h: 0.3, color: GOLD }], k });
+    if (t > tg) for (let i = 0; i < 4; i++) { const u = ((t - tg) * 0.7 + i / 4) % 1; ctx.globalAlpha = clamp((t - tg) * 3, 0, 1) * (1 - u); coin(ctx, 200 + u * 160, -240 - u * 420, 30); ctx.globalAlpha = 1; }
+    ctx.restore();
+    const ma = on(t, tb + 0.6, 0.5); if (ma > 0) { ctx.globalAlpha = ma; iconBrand(ctx, { x: 820, y: 1300, s: 0.9, fade: on(t, tb + 0.4, 1.2) }); ctx.globalAlpha = 1; }
+    drawChar(ctx, 'owner', { x: 220, y: 1600, scale: 1.2, expr: t > tb ? 'sad' : 'sweat', arms: t > tb ? {} : { r: 'point' } });
+  }, { cam: (lt) => ({ x: 540, y: 1100, zoom: 1 + Math.min(lt, 5.2) * 0.012 }), overlay: hold(H1) });
 
   // ===== ฉาก 2 ปัญหา =====
   // 6 traveler นั่งโซฟาคิด
