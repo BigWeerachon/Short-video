@@ -156,7 +156,7 @@ export default function (S) {
     const c = cal.cell(3, 1), sh = t > T(20) ? Math.sin(t * 40) * 4 : 0;
     if (t > d) { const k = on(t, d, 0.35); R(ctx, c.x - c.w / 2 - 10 * k + sh, c.y - c.h / 2 - 8 * k, c.w, c.h, 10, '#ef4444'); R(ctx, c.x - c.w / 2 + 10 * k + sh, c.y - c.h / 2 + 8 * k, c.w, c.h, 10, '#f87171'); }
     if (t > f) { const c2 = cal.cell(5, 3), u = prog(t, f, 0.8); ctx.globalAlpha = 1 - u; R(ctx, c2.x - c2.w / 2, c2.y - c2.h / 2 + u * 260, c2.w, c2.h, 10, GOLD); ctx.globalAlpha = 1; }
-    drawChar(ctx, 'owner', { x: 170, y: 1620, scale: 1.0, expr: t > d ? 'shock' : 'sweat', arms: t > d ? { r: { x: 30, y: -330, bend: 'down' } } : {} });
+    drawChar(ctx, 'owner', { x: 280, y: 1620, scale: 1.0, expr: 'sweat', arms: t > d ? { r: { x: 30, y: -330, bend: 'down' } } : {} });
   }, { cam: (lt) => ({ x: 600, y: 1050, zoom: 1.05 + Math.min(lt, 2) * 0.03 }), overlay: hold(H2) });
 
   // ===== ฉาก 3 พักอิน =====
