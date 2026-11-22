@@ -1,0 +1,20 @@
+[
+ {
+  "kind": "sfx",
+  "start": 71.6,
+  "end": 71.6,
+  "shot": 0,
+  "severity": "กลาง",
+  "owner": "sound",
+  "msg": "SFX sparkle ตกในฉากปิด"
+ },
+ {
+  "kind": "sfx",
+  "start": 72.0,
+  "end": 72.0,
+  "shot": 0,
+  "severity": "กลาง",
+  "owner": "sound",
+  "msg": "SFX chime ตกในฉากปิด"
+ }
+]

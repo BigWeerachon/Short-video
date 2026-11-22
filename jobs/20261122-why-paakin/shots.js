@@ -1,7 +1,7 @@
 // ทำไมต้องพักอิน — 26 ช็อตตาม shotlist.md (ข้อความในภาพมีแค่ H1–H4; UI ใช้แท่ง/ไอคอน L12)
 export default function (S) {
   const { shot, T, TW, prog, clamp, drawChar, logo, W, H,
-    headerCard, bizRoom, hotelFront, middlemanIcon, barChart, coin, iconBrand, star, spinner, xIcon, counter, notebook,
+    headerCard, bizRoom, hotelFront, barChart, coin, iconBrand, star, spinner, xIcon, counter, notebook,
     fileIcon, monitor, laptop, siteMock, roomCalendar, syncLine, goldCheck, gear, growthChart, heart, keyCard, thinkIcon,
     sofa, bizDesk, phoneScreen, logoCard, check, sparkles } = S;
   S.keywords(['พักอิน', 'สมาร์ทโฟน', 'กำไร', 'แบรนด์', 'เว็บไซต์', 'จองที่อื่น', 'ห้องซ้ำ', 'ตกหล่น', 'ระบบจองตรง', 'ระบบหลังบ้าน', 'ที่เดียว', 'แข็งแรง', 'เชื่อมั่น', 'มั่นคง', 'วางใจ']);
@@ -44,7 +44,11 @@ export default function (S) {
   shot(T(2), (ctx, lt, t) => {
     bizRoom(ctx, 'front');
     hotelFront(ctx, { x: 600, y: 1540, s: 0.95, sign: on(t, T(2) + 0.2, 0.4) });
-    middlemanIcon(ctx, { x: 640, y: 1080, r: 280, k: on(t, T(3), 0.45) });
+    const mk = on(t, T(3), 0.45); // การ์ดแอปจองทั่วไป (ไม่มีชื่อ/ข้อความ) ย่อ ไม่บังโรงแรมทั้งหมด
+    if (mk > 0) { ctx.save(); ctx.translate(860, 1080); ctx.scale(mk, mk);
+      R(ctx, -150, -210, 300, 420, 30, '#6b7499'); R(ctx, -130, -190, 260, 60, 14, '#8a93b5');
+      for (let i = 0; i < 3; i++) { R(ctx, -130, -110 + i * 100, 260, 84, 14, '#ffffff'); R(ctx, -118, -100 + i * 100, 64, 64, 10, '#c8d3e3'); R(ctx, -40, -90 + i * 100, 140, 12, 6, '#d5dbe8'); R(ctx, -40, -62 + i * 100, 90, 12, 6, '#d5dbe8'); }
+      ctx.restore(); }
     drawChar(ctx, 'owner', { x: 200, y: 1600, scale: 1.2, expr: t > T(3) ? 'sweat' : 'happy' });
   }, { cam: (lt) => ({ x: 540 + Math.min(lt, 2) * 20, y: 1100, zoom: 1.08 }), overlay: hold(H1) });
 
@@ -90,13 +94,9 @@ export default function (S) {
     const k = on(t, TW(9, 'เว็บไซต์'), 0.5);
     phoneAt(ctx, (c) => {
       R(c, -150, -300, 300, 60, 0, NAVY); R(c, -125, -220, 250, 56, 28, '#e3e8f2');
-      c.save(); c.translate(0, 20); c.scale(0.6 + 0.4 * k, 0.6 + 0.4 * k); c.globalAlpha = k;
-      c.fillStyle = '#c8d3e3'; c.beginPath(); c.arc(0, 0, 80, 0, 7); c.fill(); c.fillStyle = '#ffffff'; c.fillRect(-80, -6, 160, 12); c.fillRect(-6, -80, 12, 160);
-      c.fillStyle = GOLD; c.beginPath(); c.arc(70, -70, 38, 0, 7); c.fill();
-      c.fillStyle = '#ffffff'; c.font = '700 52px Kanit'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('?', 70, -66);
-      c.restore();
+      if (k < 1) spinner(c, { x: 0, y: 20, r: 50, t }); // ผลลัพธ์ว่าง: โหลดแล้วจอว่าง
     });
-    drawChar(ctx, 'traveler', { x: 150, y: 1640, scale: 0.9, expr: 'sweat' });
+    drawChar(ctx, 'traveler', { x: 150, y: 1600, scale: 0.9, expr: 'sweat' });
   }, { overlay: hold(H2) });
 
   // 9 ฟอร์มซับซ้อน → spinner → หน้าเว็บล้นจอ
@@ -111,7 +111,7 @@ export default function (S) {
         c.save(); c.scale(1.6, 1.6); for (let i = 0; i < 9; i++) R(c, -120, -170 + i * 34, 300, 10, 5, '#c8d3e3'); R(c, -120, -180, 260, 60, 8, '#9fd8f7'); c.restore();
       }
     });
-    drawChar(ctx, 'traveler', { x: 150, y: 1640, scale: 0.9, expr: 'sweat' });
+    drawChar(ctx, 'traveler', { x: 150, y: 1600, scale: 0.9, expr: 'sweat' });
   }, { cam: (lt) => ({ x: 540, y: 1110, zoom: 1 + Math.min(lt, 2.5) * 0.03 }), overlay: hold(H2) });
 
   // 10 กดออก X → โรงแรมอื่นสีเทา
@@ -263,7 +263,7 @@ export default function (S) {
     keyCard(ctx, 420 + (60 + 60 * give) + 20, 1600 - 190 - 6, 0.7);
     const nod = t > T(42) ? Math.max(0, Math.sin((t - T(42)) * 6)) * 6 : 0;
     drawChar(ctx, 'traveler', { x: 760, y: 1600 + nod, scale: 1.05, expr: t > T(42) ? 'laugh' : 'happy', dir: -1, arms: { l: { x: -110, y: -190, bend: 'down' } } });
-    if (t > T(42)) { const k = on(t, T(42), 0.5); ctx.save(); ctx.translate(820, 1050 - k * 60); ctx.scale(k, k); heart(ctx, 0, 0, 34); ctx.restore(); }
+    if (t > T(42)) { const k = on(t, T(42), 0.5); ctx.save(); ctx.translate(760, 1170 - k * 50); ctx.scale(k, k); heart(ctx, 0, 0, 34); ctx.restore(); }
   }, { overlay: hold(H4) });
 
   // 24 กราฟเติบโต
