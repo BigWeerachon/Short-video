@@ -659,3 +659,83 @@ export function sofa(ctx, { x = 540, y = 1560, w = 640 } = {}) {
 }
 /** โต๊ะทำงาน */
 export function bizDesk(ctx, { x = 540, y = 1400, w = 900 } = {}) { R(ctx, x - w / 2, y, w, 30, 12, '#ffffff'); R(ctx, x - w / 2 + 20, y + 30, w - 40, 220, 8, '#c9d4ea'); }
+
+// ===== ชุด "ฝน/ป้ายรถเมล์/ยาติดคอ" (ใช้ซ้ำได้) — ไม่มีตัวอักษร/ตัวเลข =====
+/** เม็ดฝนตกเฉียง (วาดทับฉาก) */
+export function rain(ctx, { t = 0, n = 90, seed = 21, a = 0.55, y0 = 0, y1 = H, color = '#dbe8ff', speed = 1400 } = {}) {
+  const r = rand(seed); ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = color;
+  for (let i = 0; i < n; i++) {
+    const x0 = r() * (W + 200), off = r() * (y1 - y0), len = 30 + r() * 30;
+    const y = y0 + ((off + t * speed * (0.8 + r() * 0.4)) % (y1 - y0));
+    ctx.save(); ctx.translate(x0 - (y - y0) * 0.18, y); ctx.rotate(0.18); roundRectPath(ctx, -2.5, 0, 5, len, 2.5); ctx.fill(); ctx.restore();
+  }
+  ctx.restore();
+}
+/** เงาคนเดินจากไป (ซิลลูเอต + ร่ม) — walk = เฟสก้าวเดิน */
+export function walkerShadow(ctx, { x = 800, y = 1300, s = 1, walk = 0, a = 0.75, color = '#4a5478' } = {}) {
+  ctx.save(); ctx.globalAlpha = a; ctx.translate(x, y); ctx.scale(s, s); ctx.fillStyle = color;
+  const sw = Math.sin(walk) * 18;
+  roundRectPath(ctx, -22 + sw * 0.4, -120, 18, 120, 9); ctx.fill();
+  roundRectPath(ctx, 4 - sw * 0.4, -120, 18, 120, 9); ctx.fill();
+  roundRectPath(ctx, -34, -250, 68, 140, 30); ctx.fill();
+  dot(ctx, 0, -285, 34, color);
+  ctx.beginPath(); ctx.arc(0, -330, 95, Math.PI, 0); ctx.fill();
+  R(ctx, -4, -330, 8, 70, 4, color);
+  ctx.restore();
+}
+/** ภาพตัดขวางคอการ์ตูน วาดในวงกลมรัศมี r (origin = กลางวง); pill = 0..1 ตำแหน่งยาบน→ล่าง, gulp = คลื่นน้ำไหลผ่าน 0..1 */
+export function throatCross(ctx, { x = W / 2, y = 600, r = 260, k = 1, pill = 0.45, gulp = 0, t = 0 } = {}) {
+  if (k <= 0) return;
+  ctx.save(); ctx.translate(x, y); ctx.scale(pop(k), pop(k));
+  dot(ctx, 0, 0, r, '#ffffff');
+  ctx.save(); ctx.beginPath(); ctx.arc(0, 0, r - 14, 0, Math.PI * 2); ctx.clip();
+  const u = (r - 14) / 246; ctx.scale(u, u); // พิกัดภายใน 492x492 → scale เต็มวง (L19)
+  R(ctx, -260, -260, 520, 520, 0, '#ffe3cc');
+  // ผิวคอ/คาง
+  ctx.fillStyle = '#f6c9a2'; ctx.beginPath(); ctx.moveTo(-260, -260); ctx.lineTo(-120, -260); ctx.quadraticCurveTo(-140, -120, -110, 260); ctx.lineTo(-260, 260); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(260, -260); ctx.lineTo(60, -260); ctx.quadraticCurveTo(130, -140, 120, 260); ctx.lineTo(260, 260); ctx.fill();
+  // หลอดอาหาร
+  ctx.fillStyle = '#ff9aa8'; ctx.beginPath(); ctx.moveTo(-90, -260); ctx.quadraticCurveTo(-70, -60, -60, 260); ctx.lineTo(70, 260); ctx.quadraticCurveTo(70, -60, 40, -260); ctx.fill();
+  ctx.fillStyle = '#ff7f93'; ctx.beginPath(); ctx.moveTo(-40, -260); ctx.quadraticCurveTo(-25, -60, -20, 260); ctx.lineTo(25, 260); ctx.quadraticCurveTo(25, -60, 0, -260); ctx.fill();
+  // น้ำไหลผ่าน
+  if (gulp > 0 && gulp < 1) { const gy = -300 + gulp * 600; ctx.fillStyle = 'rgba(110,190,255,0.85)'; ctx.beginPath(); ctx.ellipse(-5, gy, 44, 70, 0, 0, Math.PI * 2); ctx.fill(); }
+  // เม็ดยาขาว + หน้าน่ารัก
+  const py = -170 + pill * 340, wob = Math.sin(t * 12) * 3;
+  ctx.save(); ctx.translate(-5 + wob, py); ctx.rotate(0.35);
+  ctx.fillStyle = 'rgba(0,0,0,0.12)'; roundRectPath(ctx, -52, -26, 108, 60, 30); ctx.fill();
+  R(ctx, -54, -30, 108, 60, 30, '#ffffff'); R(ctx, -2, -26, 4, 52, 2, '#e3e8f2');
+  ctx.restore();
+  dot(ctx, -24 + wob, py - 4, 5, '#2b2233'); dot(ctx, 14 + wob, py + 8, 5, '#2b2233');
+  ctx.restore(); ctx.restore();
+}
+/** นาฬิกาแขวน ไม่มีตัวเลข; a = มุมเข็มยาว (เรเดียน) */
+export function clock(ctx, { x = 540, y = 500, r = 120, a = 0, k = 1 } = {}) {
+  if (k <= 0) return;
+  ctx.save(); ctx.translate(x, y); ctx.scale(k, k);
+  dot(ctx, 0, 0, r, '#f6b860'); dot(ctx, 0, 0, r * 0.84, '#ffffff');
+  for (let i = 0; i < 12; i++) { const q = i * Math.PI / 6; dot(ctx, Math.sin(q) * r * 0.7, -Math.cos(q) * r * 0.7, i % 3 ? r * 0.03 : r * 0.055, '#9aa3bf'); }
+  const hand = (ang, len, w, c) => { ctx.save(); ctx.rotate(ang); R(ctx, -w / 2, -len, w, len + w, w / 2, c); ctx.restore(); };
+  hand(a / 12, r * 0.42, r * 0.09, NAVY); hand(a, r * 0.62, r * 0.06, '#ef4444');
+  dot(ctx, 0, 0, r * 0.08, NAVY);
+  ctx.restore();
+}
+/** ป้ายรถเมล์: หลังคา + เสา + ม้านั่ง (origin = กลางพื้น) */
+export function busStopBench(ctx, { x = 540, y = 1500, w = 820, s = 1 } = {}) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  R(ctx, -w / 2 + 30, -760, 26, 760, 13, '#8a95ad'); R(ctx, w / 2 - 56, -760, 26, 760, 13, '#8a95ad');
+  R(ctx, -w / 2, -800, w, 60, 24, '#2f6fdf'); R(ctx, -w / 2 + 20, -740, w - 40, 16, 8, '#1e4fb0');
+  R(ctx, -w / 2 + 60, -700, w - 120, 420, 20, 'rgba(200,230,255,0.35)');
+  R(ctx, -w / 2 + 70, -270, w - 140, 34, 14, '#c98a4b'); R(ctx, -w / 2 + 70, -230, w - 140, 26, 12, '#b0753b');
+  R(ctx, -w / 2 + 110, -210, 20, 210, 8, '#5b6480'); R(ctx, w / 2 - 130, -210, 20, 210, 8, '#5b6480');
+  ctx.restore();
+}
+/** แก้วน้ำใหญ่ (origin = ก้นแก้ว), fill = ระดับน้ำ 0..1, tilt = เอียง */
+export function bigGlass(ctx, { x = 540, y = 1000, s = 1, fill = 0.8, tilt = 0 } = {}) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(tilt); ctx.scale(s, s);
+  const shape = () => { ctx.beginPath(); ctx.moveTo(-50, -200); ctx.lineTo(50, -200); ctx.lineTo(40, 0); ctx.lineTo(-40, 0); ctx.closePath(); };
+  ctx.fillStyle = 'rgba(220,240,255,0.85)'; shape(); ctx.fill();
+  ctx.save(); shape(); ctx.clip(); ctx.rotate(-tilt);
+  R(ctx, -120, -200 * fill, 240, 400, 0, '#5cb8ff'); R(ctx, -120, -200 * fill, 240, 14, 7, '#9ad6ff'); ctx.restore();
+  R(ctx, -36, -180, 12, 150, 6, 'rgba(255,255,255,0.7)');
+  ctx.restore();
+}

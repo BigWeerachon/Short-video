@@ -41,3 +41,11 @@ test('headerCard fits text inside card width', () => {
   c.font = `700 ${r.size}px Kanit`;
   for (const l of r.lines) assert.ok(c.measureText(l).width <= 980 - 68);
 });
+
+test('rain/bus-stop/throat props draw without throwing', () => {
+  const c = fakeCtx();
+  assert.doesNotThrow(() => {
+    S.rain(c, { t: 1.3 }); S.walkerShadow(c, { walk: 2 }); S.throatCross(c, { pill: 0.5, gulp: 0.4, t: 1 }); S.throatCross(c, { k: 0 });
+    S.clock(c, { a: 3 }); S.busStopBench(c); S.bigGlass(c, { fill: 0.3, tilt: 0.5 });
+  });
+});
