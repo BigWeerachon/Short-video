@@ -37,7 +37,8 @@ export function ik2(shoulder, target, l1, l2, bendSign = 1) {
 }
 
 // เป้ามือ (แขนขวาของภาพ, x บวก) — แขนซ้ายสะท้อนแกน x
-const ARM = {
+export const ARM = {
+  throat: { x: 30, y: -220, bend: 'out', elbow: { x: 82, y: -198 } }, drink: { x: 50, y: -244, bend: 'out' },
   down: { x: 50, y: -112, bend: 'out' }, hips: { x: 72, y: -128, bend: 'out' }, up: { x: 62, y: -335, bend: 'out' },
   cheer: { x: 100, y: -300, bend: 'out' }, wave: { x: 100, y: -300, bend: 'out', wave: true }, point: { x: 135, y: -215, bend: 'down' },
   'cover-mouth': { x: 16, y: -262, bend: 'down' }, 'cover-eyes': { x: 26, y: -298, bend: 'down' }, cheek: { x: 52, y: -272, bend: 'down' },
@@ -49,7 +50,7 @@ function armTarget(spec, side, t) {
   if (spec && typeof spec === 'object') return { x: spec.x, y: spec.y, bend: spec.bend || 'down' };
   const p = ARM[spec || 'down'] || ARM.down;
   const wob = p.wave ? Math.sin(t * 9) * 18 : 0;
-  return { x: side * (p.x + wob), y: p.y, bend: p.bend };
+  return { x: side * (p.x + wob), y: p.y, bend: p.bend, elbow: p.elbow && { x: side * p.elbow.x, y: p.elbow.y } };
 }
 
 const DEF = { x: 540, y: 1500, scale: 1, dir: 1, expr: 'happy', talk: false, mode: 'stand', arms: {}, walkPhase: 0, prop: null };
@@ -113,7 +114,8 @@ export function drawChar(ctx, castId, pose = {}) {
     }
     tg.y = Y(tg.y);
     const sign = pickBend(sh[k], tg, side);
-    arms[k] = { ...ik2(sh[k], tg, 55, 52, sign), sh: sh[k], front: p.armsFront ?? tg.y < Y(-228), side };
+    const sol = tg.elbow ? { elbow: { x: tg.elbow.x, y: Y(tg.elbow.y) }, hand: { x: tg.x, y: tg.y } } : ik2(sh[k], tg, 55, 52, sign);
+    arms[k] = { ...sol, sh: sh[k], front: p.armsFront ?? tg.y < Y(-228), side };
   }
   for (const k of ['l', 'r']) if (!arms[k].front) drawArm(ctx, c, arms[k]);
 
@@ -145,7 +147,7 @@ export function drawChar(ctx, castId, pose = {}) {
   drawHead(ctx, c, p, t, Y(-292));
   // แขนหน้า (มือขึ้นหน้า → วาดทับหัว)
   for (const k of ['l', 'r']) if (arms[k].front) drawArm(ctx, c, arms[k]);
-  if (p.prop) drawProp(ctx, p.prop, arms.r);
+  if (p.prop) drawProp(ctx, p.prop, arms[p.prop.hand || 'r']);
   ctx.restore();
 }
 
@@ -310,7 +312,24 @@ function drawFace(ctx, c, p, t, cy) {
   if (e === 'sleep') { ctx.fillStyle = '#ffffff'; ctx.font = '700 28px Kanit'; ctx.fillText('z', 60, cy - 60 - (t * 10) % 20); }
 }
 
+/** แก้วในมือ: ยึดกับตำแหน่งมือจาก IK ทุกเฟรม ปากแก้วเอียงเข้าหาหน้า (tilt 0..1) */
+export function glassPose(arm, tilt = 0) {
+  const rot = -arm.side * 0.75 * tilt;
+  return { x: arm.hand.x, y: arm.hand.y, rot, rim: { x: arm.hand.x + Math.sin(rot) * 40, y: arm.hand.y - Math.cos(rot) * 40 } };
+}
+
 function drawProp(ctx, prop, arm) {
+  if (prop.type === 'glass') {
+    const g = glassPose(arm, prop.tilt || 0), f = prop.fill ?? 0.7;
+    ctx.save(); ctx.translate(g.x, g.y); ctx.rotate(g.rot);
+    const shape = () => { ctx.beginPath(); ctx.moveTo(-20, -40); ctx.lineTo(20, -40); ctx.lineTo(16, 28); ctx.lineTo(-16, 28); ctx.closePath(); };
+    ctx.fillStyle = 'rgba(220,240,255,0.9)'; shape(); ctx.fill();
+    ctx.save(); shape(); ctx.clip(); ctx.rotate(-g.rot);
+    ctx.fillStyle = '#5cb8ff'; ctx.fillRect(-60, 28 - 68 * f, 120, 140); ctx.restore();
+    ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.fillRect(-14, -34, 5, 50);
+    ctx.restore();
+    ctx.fillStyle = SKIN; circle(ctx, arm.hand.x, arm.hand.y, 13); // นิ้วโอบหน้าแก้ว
+  }
   if (prop.type === 'phone') {
     ctx.save(); ctx.translate(arm.hand.x, arm.hand.y - 6);
     ctx.fillStyle = '#25304a'; roundRectPath(ctx, -14, -26, 28, 46, 6); ctx.fill();
