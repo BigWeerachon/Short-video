@@ -1,0 +1,12 @@
+# handoff: film-director → animator
+- เสร็จ: shotlist.md 24 ช็อต + end card ผูก T(i)/TW ครบวลี #0–63
+- ไฟล์: jobs/20261127-seven-days/shotlist.md
+- สร้างใน engine/web/cast.js: mon(เหลือง) tue(ชมพู) wed(เขียว) thu(ส้ม) fri(ฟ้า) sat(ม่วง) sun(แดง) หน้าตาตามตาราง
+- prop rig ใหม่: calendarBig suitcase magnifier calculator selfieStick receipt sunglasses (ผูกมือ L23)
+- ฉากใหม่: carInterior trafficLight nightRoom cobweb marbleTile luxuryView webBooking bookedToast logoCard
+- ห้ามตัวอักษร/ตัวเลขในภาพ (ปฏิทิน/เครื่องคิดเลข/ใบเสร็จ/จอ ใช้ช่องสี/เส้น)
+- ปากไม่ขยับทุกช็อต ยกเว้น #16 sat talk ช่วง T(41)
+- แตะจอใช้ tap:{x,y,ring} ใน phoneScreen เท่านั้น (L20)
+- ช็อต #11 ยาว ~2.5 วิพอดี ให้แอนิเมชันจบเร็ว
+- logoCard: โลโก้บนการ์ดขาวมุมมนกึ่งกลาง เด้งที่ TW(53,'พักอิน')
+- เนื้อหาหลักเหนือ y 1650
