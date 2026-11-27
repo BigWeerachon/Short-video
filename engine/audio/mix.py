@@ -26,12 +26,25 @@ def _atempo(path, factor):
     return out
 
 
+def apply_mutes(vo, mutes, sr):
+    """mute ช่วงเสียงไอ (L13) พร้อม fade 10ms รอบขอบ — แก้ในที่"""
+    for s, e in mutes:  # เสียงไอ ฯลฯ (L13)
+        a, b = int(s * sr), int(e * sr)
+        f = int(0.01 * sr)  # fade 10ms รอบช่วง mute กันคลิก
+        vo[a:b] = 0
+        fa, fb = min(f, a), min(f, len(vo) - b)
+        if fa > 0:
+            vo[a - fa:a] *= np.linspace(1, 0, fa)
+        if fb > 0:
+            vo[b:b + fb] *= np.linspace(0, 1, fb)
+    return vo
+
+
 def mix(vo_path, end_voice_path, music_segs, sfx_events, out_path, sr=44100, atempo=1.0, mutes=()) -> float:
     if atempo != 1.0:
         vo_path = _atempo(vo_path, atempo)
     vo = decode(vo_path, sr)
-    for s, e in mutes:  # เสียงไอ ฯลฯ (L13)
-        vo[int(s * sr):int(e * sr)] = 0
+    apply_mutes(vo, mutes, sr)
     voice = np.concatenate([vo, decode(end_voice_path, sr)])
     n = len(voice)
     segs = [dict(s) for s in music_segs]

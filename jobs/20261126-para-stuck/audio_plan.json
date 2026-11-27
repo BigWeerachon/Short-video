@@ -1,0 +1,8 @@
+{"vo":"vo.mp3","mutes":[],
+"music":[
+{"mood":"ukulele","start":0.0,"end":1.365,"level":0.25,"bpm":70,"shift":-3,"gain":0.8},
+{"mood":"ukulele","start":1.365,"end":2.726,"level":0.9,"bpm":126,"shift":0},
+{"mood":"ukulele","start":2.726,"end":5.101,"level":0.25,"bpm":70,"shift":-3,"gain":0.8},
+{"mood":"ukulele","start":5.101,"end":9.0,"level":0.9,"bpm":126,"shift":0},
+{"mood":"outro","start":9.0,"end":20.0}],
+"sfx":[{"name":"boing","t":1.65},{"name":"boing","t":5.7,"gain":1.1}]}

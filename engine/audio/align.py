@@ -5,12 +5,36 @@ from .io import duration, dump
 MAX_PH, MAX_CH = 6, 8
 
 
+def _thai_words(text: str) -> list:
+    """ตัดคำไทยด้วย Intl.Segmenter ของ Node (ตัวเดียวกับที่ใช้ทำซับ)"""
+    js = "const t=require('fs').readFileSync(0,'utf8');console.log(JSON.stringify([...new Intl.Segmenter('th',{granularity:'word'}).segment(t)].map(s=>s.segment)))"
+    out = subprocess.run(["node", "-e", js], input=text, capture_output=True, text=True, check=True).stdout
+    return json.loads(out)
+
+
 def split_phrases(text: str, max_chars=40) -> list:
+    toks = re.findall(r"[^\s,.!?…]+[,.!?…]*", text)
+    merged = []
+    for tok in toks:                                   # "ๆ" ติดกับคำข้างหน้าเสมอ
+        if tok.startswith("ๆ") and merged:
+            merged[-1] += " " + tok
+        else:
+            merged.append(tok)
     out = []
-    for tok in re.findall(r"[^\s,.!?…]+[,.!?…]*", text):
+    for tok in merged:
+        if len(tok) <= max_chars:
+            out.append(tok)
+            continue
+        words = _thai_words(tok)                       # วลียาว: ตัดที่ขอบคำ ไม่ตัดกลางคำ
         k = math.ceil(len(tok) / max_chars)
-        size = math.ceil(len(tok) / k)
-        out += [tok[i:i + size] for i in range(0, len(tok), size)]
+        target = len(tok) / k
+        cur = ""
+        for w in words:
+            if cur and (len(cur) + len(w) > max_chars or len(cur) >= target):
+                out.append(cur); cur = ""
+            cur += w
+        if cur:
+            out.append(cur)
     return out
 
 

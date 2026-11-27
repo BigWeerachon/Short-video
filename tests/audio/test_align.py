@@ -67,3 +67,10 @@ def test_align_long_cough_in_gap(make_audio):
     out = align(phrases, speech_chunks(make_audio(spec)))
     assert abs(out[1]["s"] - 1.9) < 0.3 and out[1]["e"] < 4.0
     assert abs(out[2]["s"] - 6.4) < 0.3
+
+
+def test_split_keeps_mai_yamok_and_whole_words():
+    ps = split_phrases("คืนนี้ผมมีเรื่องหลอน ๆ ของพี่ ผมได้รับออเดอร์ชานมไข่มุกด่วนส่งบ้านพักปลายทาง")
+    assert "ๆ" not in ps and any(p.endswith("ๆ") for p in ps)
+    assert not any(p.startswith(("ุ", "ั", "ิ", "ี", "่", "้", "า", "ะ")) for p in ps)
+    assert "ไข่มุก" in "".join(ps) and any("ไข่มุก" in p for p in ps)

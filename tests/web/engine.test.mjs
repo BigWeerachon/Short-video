@@ -69,3 +69,12 @@ test('fitText shrinks a 60-char title under 940', () => {
   ctx.font = `700 ${s}px Kanit`;
   assert.ok(ctx.measureText(t).width <= 940 && s < 80);
 });
+
+test('ท่า throat/drink: ข้อศอกออกนอกลำตัว + แก้วยึดมือ', async () => {
+  const { ARM, glassPose } = await import('../../engine/web/rig.js');
+  for (const k of ['throat', 'drink']) { assert.equal(ARM[k].bend, 'out'); }
+  assert.ok(ARM.throat.elbow.x > 60 && ARM.throat.elbow.y > ARM.throat.y, 'ศอกกางออกและต่ำกว่ามือ');
+  const arm = { hand: { x: -50, y: -244 }, side: -1 };
+  const g = glassPose(arm, 1);
+  assert.equal(g.x, -50); assert.ok(g.rim.x > g.x, 'ปากแก้วเอียงเข้าหน้า');
+});

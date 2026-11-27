@@ -1,0 +1,92 @@
+[
+ {
+  "kind": "crop",
+  "start": 9.2,
+  "end": 10.1,
+  "shot": 5,
+  "severity": "ต่ำ",
+  "owner": "animator",
+  "msg": "ตัวละครลงไปอยู่ในโซนซับ (y>1700)"
+ },
+ {
+  "kind": "crop",
+  "start": 9.3,
+  "end": 9.4,
+  "shot": 5,
+  "severity": "กลาง",
+  "owner": "animator",
+  "msg": "ตัวละครหลุดขอบจอ/หัวขาด"
+ },
+ {
+  "kind": "crop",
+  "start": 42.6,
+  "end": 44.5,
+  "shot": 21,
+  "severity": "กลาง",
+  "owner": "animator",
+  "msg": "ตัวละครหลุดขอบจอ/หัวขาด"
+ },
+ {
+  "kind": "identity",
+  "start": 49.5,
+  "end": 49.6,
+  "shot": 24,
+  "severity": "ต่ำ",
+  "owner": "animator",
+  "msg": "ghost โผล่ขึ้นกลางช็อต — เช็กว่าตรงคำพูด"
+ },
+ {
+  "kind": "duplicate",
+  "start": 49.6,
+  "end": 50.9,
+  "shot": 24,
+  "severity": "กลาง",
+  "owner": "animator",
+  "msg": "ตัวละครเดียวกันโผล่ 2 ตัวในเฟรม"
+ },
+ {
+  "kind": "voice-no-mouth",
+  "start": 68.6,
+  "end": 69.6,
+  "shot": 32,
+  "severity": "ต่ำ",
+  "owner": "film-director",
+  "msg": "มีเสียงพูด แต่ไม่มีตัวละครในภาพขยับปาก (อาจเป็นเสียงบรรยายนอกจอ — ยืนยันว่าตั้งใจ)"
+ },
+ {
+  "kind": "identity",
+  "start": 72.3,
+  "end": 72.4,
+  "shot": 34,
+  "severity": "ต่ำ",
+  "owner": "animator",
+  "msg": "rider โผล่ขึ้นกลางช็อต — เช็กว่าตรงคำพูด"
+ },
+ {
+  "kind": "identity",
+  "start": 74.5,
+  "end": 74.6,
+  "shot": 34,
+  "severity": "ต่ำ",
+  "owner": "animator",
+  "msg": "ghost โผล่ขึ้นกลางช็อต — เช็กว่าตรงคำพูด"
+ },
+ {
+  "kind": "identity",
+  "start": 77.3,
+  "end": 77.4,
+  "shot": 34,
+  "severity": "กลาง",
+  "owner": "animator",
+  "msg": "ghost หายไปกลางช็อต — ตั้งใจหรือไม่?"
+ },
+ {
+  "kind": "identity",
+  "start": 77.3,
+  "end": 77.4,
+  "shot": 34,
+  "severity": "กลาง",
+  "owner": "animator",
+  "msg": "rider หายไปกลางช็อต — ตั้งใจหรือไม่?"
+ }
+]

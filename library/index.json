@@ -1,1 +1,56 @@
-[]
+[
+ {
+  "id": "20261113-01",
+  "title": "ออเดอร์เที่ยงคืน หลอนทางเปลี่ยว หนีผีซุกโรงแรมด้วย พักอิน",
+  "type": "story_clip",
+  "series": "เรื่องเล่าเขย่าขวัญ",
+  "characters": [
+   "narrator",
+   "rider",
+   "ghost"
+  ],
+  "mood": "spooky",
+  "paakin_feature": "booking",
+  "status": "ready",
+  "posted": {
+   "youtube": null,
+   "facebook": null,
+   "tiktok": null,
+   "instagram": null
+  },
+  "files": {
+   "mp4": "library/2026-11/20261113-01-ออเดอร์เที่ยงคืน-หลอนทางเปลี่ยว-หนีผีซุก/clip.mp4",
+   "mp4_ref": "ส่งให้ผู้ใช้ในแชทแล้ว 2026-11-13",
+   "captions": "library/2026-11/20261113-01-ออเดอร์เที่ยงคืน-หลอนทางเปลี่ยว-หนีผีซุก/captions.json",
+   "folder": "library/2026-11/20261113-01-ออเดอร์เที่ยงคืน-หลอนทางเปลี่ยว-หนีผีซุก"
+  },
+  "created": "2026-11-13T07:14:11"
+ },
+ {
+  "id": "20261122-01",
+  "title": "ทำไมเจ้าของโรงแรมยุคใหม่ต้องเลือก พักอิน",
+  "type": "promo",
+  "series": "explainer",
+  "characters": [
+   "owner",
+   "reception",
+   "traveler"
+  ],
+  "mood": "จริงจัง มีสาระ",
+  "paakin_feature": "เว็บไซต์ + ระบบจองตรง + ระบบหลังบ้าน",
+  "status": "ready",
+  "posted": {
+   "youtube": null,
+   "facebook": null,
+   "tiktok": null,
+   "instagram": null
+  },
+  "files": {
+   "mp4": "library/2026-11/20261122-01-ทำไมเจ้าของโรงแรมยุคใหม่ต้องเลือก-พักอิน/clip.mp4",
+   "mp4_ref": null,
+   "captions": "library/2026-11/20261122-01-ทำไมเจ้าของโรงแรมยุคใหม่ต้องเลือก-พักอิน/captions.json",
+   "folder": "library/2026-11/20261122-01-ทำไมเจ้าของโรงแรมยุคใหม่ต้องเลือก-พักอิน"
+  },
+  "created": "2026-11-22T04:48:56"
+ }
+]

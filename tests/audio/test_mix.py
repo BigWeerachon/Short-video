@@ -53,3 +53,26 @@ def test_ducking(files):
     v = decode(vo, SR)
     g = duck_curve(v, SR)
     assert g[int(2.0 * SR)] <= 0.5 and g[int(0.3 * SR)] > 0.9
+
+
+def test_ukulele_style_tonal_and_levels():
+    import numpy as np
+    from engine.audio.music import karplus, MOODS
+    assert "ukulele" in MOODS
+    lo = music([{"mood": "ukulele", "start": 0, "end": 4, "level": 0.1, "gain": 0.8}], sr=SR)
+    hi = music([{"mood": "ukulele", "start": 0, "end": 4, "level": 0.9}], sr=SR)
+    assert len(lo) == len(hi) == 4 * SR
+    assert np.isfinite(hi).all() and np.abs(hi).max() > 0.05
+    assert np.sqrt((hi ** 2).mean()) > np.sqrt((lo ** 2).mean())
+    # KS ที่ 440 Hz: พลังงานสเปกตรัมสูงสุดใกล้ 440 (tonal ไม่ใช่ noise)
+    y = karplus(440.0, 0.5, SR)
+    f = np.fft.rfftfreq(len(y), 1 / SR)
+    assert abs(f[np.abs(np.fft.rfft(y)).argmax()] - 440) < 15
+
+
+def test_mute_fade():
+    from engine.audio.mix import apply_mutes
+    v = apply_mutes(np.ones(SR), [(0.5, 0.6)], SR)
+    a, b = int(0.5 * SR), int(0.6 * SR)
+    assert np.all(v[a:b] == 0) and v[a - 1] < 0.05 and v[b] < 0.05
+    assert v[a - 600] == 1 and v[b + 600] == 1 and np.all(np.diff(v[a - 441:a]) <= 0)

@@ -1,7 +1,7 @@
 // ตัวเล่น: โหลดงาน → วาดทุกเฟรมจากเวลา (deterministic) ใช้ทั้ง preview และ export
 import { W, H, FPS, clamp, prog, makeTiming, clampCam, createShots } from './core.js';
 import * as scenes from './scenes.js';
-import { drawChar, setClock, EXPRS } from './rig.js';
+import { drawChar, setClock, EXPRS, qaLog } from './rig.js';
 import { CAST } from './cast.js';
 import { layoutSub, drawSub } from './subs.js';
 
@@ -53,6 +53,16 @@ async function boot() {
       if (s.overlay) s.overlay(ctx, s.lt, t, s); // ข้อความ/การ์ดที่ไม่ขยับตามกล้อง
     } else { scenes.sky(ctx, 'studio'); }
     if (state.subsOn) drawSubtitle(words, t);
+  };
+  // QA: วาดเฟรมแล้วคืนข้อมูลตัวละคร/ช็อต/ค่าปากจากเสียง (ใช้โดย engine/qa/probe.mjs)
+  const shotStarts = shots.list.map((x) => x.start).filter(Number.isFinite).sort((a, b) => a - b);
+  window.__qaFrame = (t) => {
+    qaLog.on = true; qaLog.items = [];
+    window.renderAt(t);
+    qaLog.on = false;
+    const s = t < state.voDur ? shots.at(t) : null;
+    return { t: +t.toFixed(3), shot: s ? shotStarts.indexOf(s.start) + 1 : 0, shotStart: s ? +s.start.toFixed(3) : null,
+      endCard: t >= state.voDur, voice: env[Math.floor(t * FPS)] || 0, chars: qaLog.items };
   };
   window.JOB = { id: jobId, total: state.total, voDur: state.voDur, fps: FPS };
   setupTransport();

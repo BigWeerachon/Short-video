@@ -29,7 +29,7 @@ def test_unknown_model():
 
 
 AGENTS = ["director", "writer", "sound", "film-director", "animator", "editor",
-          "critic", "marketer", "planner", "librarian"]
+          "critic", "marketer", "planner", "librarian", "qa-visual", "qa-motion", "qa-av"]
 
 
 def test_repo_agents():
@@ -42,7 +42,7 @@ def test_repo_agents():
     assert "Read" in critic["tools"]
 
 
-SKILLS = ["make-clip", "fix-clip", "captions", "post", "plan-week", "report", "remember"]
+SKILLS = ["make-clip", "fix-clip", "captions", "post", "plan-week", "report", "remember", "qa-clip"]
 
 
 def test_skills():

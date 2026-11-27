@@ -1,0 +1,236 @@
+[
+ {
+  "kind": "identity",
+  "start": 5.8,
+  "end": 5.9,
+  "shot": 2,
+  "severity": "ต่ำ",
+  "owner": "animator",
+  "msg": "tue โผล่ขึ้นกลางช็อต — เช็กว่าตรงคำพูด"
+ },
+ {
+  "kind": "identity",
+  "start": 6,
+  "end": 6.1,
+  "shot": 2,
+  "severity": "ต่ำ",
+  "owner": "animator",
+  "msg": "wed โผล่ขึ้นกลางช็อต — เช็กว่าตรงคำพูด"
+ },
+ {
+  "kind": "identity",
+  "start": 6.1,
+  "end": 6.2,
+  "shot": 2,
+  "severity": "ต่ำ",
+  "owner": "animator",
+  "msg": "thu โผล่ขึ้นกลางช็อต — เช็กว่าตรงคำพูด"
+ },
+ {
+  "kind": "identity",
+  "start": 6.3,
+  "end": 6.4,
+  "shot": 2,
+  "severity": "ต่ำ",
+  "owner": "animator",
+  "msg": "fri โผล่ขึ้นกลางช็อต — เช็กว่าตรงคำพูด"
+ },
+ {
+  "kind": "identity",
+  "start": 6.5,
+  "end": 6.6,
+  "shot": 2,
+  "severity": "ต่ำ",
+  "owner": "animator",
+  "msg": "sat โผล่ขึ้นกลางช็อต — เช็กว่าตรงคำพูด"
+ },
+ {
+  "kind": "identity",
+  "start": 6.7,
+  "end": 6.8,
+  "shot": 2,
+  "severity": "ต่ำ",
+  "owner": "animator",
+  "msg": "sun โผล่ขึ้นกลางช็อต — เช็กว่าตรงคำพูด"
+ },
+ {
+  "kind": "teleport",
+  "start": 9.5,
+  "end": 9.6,
+  "shot": 3,
+  "severity": "สูง",
+  "owner": "animator",
+  "msg": "mon กระโดดตำแหน่งกะทันหัน (ภาพกระตุก/วาร์ป)"
+ },
+ {
+  "kind": "voice-no-mouth",
+  "start": 13.1,
+  "end": 14.1,
+  "shot": 4,
+  "severity": "ต่ำ",
+  "owner": "film-director",
+  "msg": "มีเสียงพูด แต่ไม่มีตัวละครในภาพขยับปาก (อาจเป็นเสียงบรรยายนอกจอ — ยืนยันว่าตั้งใจ)"
+ },
+ {
+  "kind": "teleport",
+  "start": 28.5,
+  "end": 28.6,
+  "shot": 8,
+  "severity": "สูง",
+  "owner": "animator",
+  "msg": "wed กระโดดตำแหน่งกะทันหัน (ภาพกระตุก/วาร์ป)"
+ },
+ {
+  "kind": "crop",
+  "start": 31.9,
+  "end": 32.1,
+  "shot": 9,
+  "severity": "ต่ำ",
+  "owner": "animator",
+  "msg": "ตัวละครลงไปอยู่ในโซนซับ (y>1700)"
+ },
+ {
+  "kind": "teleport",
+  "start": 32.1,
+  "end": 32.2,
+  "shot": 9,
+  "severity": "สูง",
+  "owner": "animator",
+  "msg": "wed กระโดดตำแหน่งกะทันหัน (ภาพกระตุก/วาร์ป)"
+ },
+ {
+  "kind": "identity",
+  "start": 35.2,
+  "end": 35.3,
+  "shot": 10,
+  "severity": "ต่ำ",
+  "owner": "animator",
+  "msg": "pal โผล่ขึ้นกลางช็อต — เช็กว่าตรงคำพูด"
+ },
+ {
+  "kind": "crop",
+  "start": 36.7,
+  "end": 37.7,
+  "shot": 10,
+  "severity": "กลาง",
+  "owner": "animator",
+  "msg": "ตัวละครหลุดขอบจอ/หัวขาด"
+ },
+ {
+  "kind": "teleport",
+  "start": 37.8,
+  "end": 37.9,
+  "shot": 11,
+  "severity": "สูง",
+  "owner": "animator",
+  "msg": "thu กระโดดตำแหน่งกะทันหัน (ภาพกระตุก/วาร์ป)"
+ },
+ {
+  "kind": "voice-no-mouth",
+  "start": 39.5,
+  "end": 40.5,
+  "shot": 11,
+  "severity": "ต่ำ",
+  "owner": "film-director",
+  "msg": "มีเสียงพูด แต่ไม่มีตัวละครในภาพขยับปาก (อาจเป็นเสียงบรรยายนอกจอ — ยืนยันว่าตั้งใจ)"
+ },
+ {
+  "kind": "teleport",
+  "start": 45.3,
+  "end": 45.4,
+  "shot": 13,
+  "severity": "สูง",
+  "owner": "animator",
+  "msg": "fri กระโดดตำแหน่งกะทันหัน (ภาพกระตุก/วาร์ป)"
+ },
+ {
+  "kind": "identity",
+  "start": 53.6,
+  "end": 53.7,
+  "shot": 15,
+  "severity": "ต่ำ",
+  "owner": "animator",
+  "msg": "pal โผล่ขึ้นกลางช็อต — เช็กว่าตรงคำพูด"
+ },
+ {
+  "kind": "identity",
+  "start": 53.6,
+  "end": 53.7,
+  "shot": 15,
+  "severity": "ต่ำ",
+  "owner": "animator",
+  "msg": "sat โผล่ขึ้นกลางช็อต — เช็กว่าตรงคำพูด"
+ },
+ {
+  "kind": "teleport",
+  "start": 61.3,
+  "end": 61.4,
+  "shot": 17,
+  "severity": "สูง",
+  "owner": "animator",
+  "msg": "sun กระโดดตำแหน่งกะทันหัน (ภาพกระตุก/วาร์ป)"
+ },
+ {
+  "kind": "identity",
+  "start": 69.3,
+  "end": 69.4,
+  "shot": 19,
+  "severity": "ต่ำ",
+  "owner": "animator",
+  "msg": "tue โผล่ขึ้นกลางช็อต — เช็กว่าตรงคำพูด"
+ },
+ {
+  "kind": "identity",
+  "start": 69.4,
+  "end": 69.5,
+  "shot": 19,
+  "severity": "ต่ำ",
+  "owner": "animator",
+  "msg": "wed โผล่ขึ้นกลางช็อต — เช็กว่าตรงคำพูด"
+ },
+ {
+  "kind": "identity",
+  "start": 69.5,
+  "end": 69.6,
+  "shot": 19,
+  "severity": "ต่ำ",
+  "owner": "animator",
+  "msg": "thu โผล่ขึ้นกลางช็อต — เช็กว่าตรงคำพูด"
+ },
+ {
+  "kind": "identity",
+  "start": 69.7,
+  "end": 69.8,
+  "shot": 19,
+  "severity": "ต่ำ",
+  "owner": "animator",
+  "msg": "fri โผล่ขึ้นกลางช็อต — เช็กว่าตรงคำพูด"
+ },
+ {
+  "kind": "identity",
+  "start": 69.8,
+  "end": 69.9,
+  "shot": 19,
+  "severity": "ต่ำ",
+  "owner": "animator",
+  "msg": "sat โผล่ขึ้นกลางช็อต — เช็กว่าตรงคำพูด"
+ },
+ {
+  "kind": "identity",
+  "start": 69.9,
+  "end": 70,
+  "shot": 19,
+  "severity": "ต่ำ",
+  "owner": "animator",
+  "msg": "sun โผล่ขึ้นกลางช็อต — เช็กว่าตรงคำพูด"
+ },
+ {
+  "kind": "voice-no-mouth",
+  "start": 70.7,
+  "end": 72.1,
+  "shot": 19,
+  "severity": "ต่ำ",
+  "owner": "film-director",
+  "msg": "มีเสียงพูด แต่ไม่มีตัวละครในภาพขยับปาก (อาจเป็นเสียงบรรยายนอกจอ — ยืนยันว่าตั้งใจ)"
+ }
+]
