@@ -144,49 +144,22 @@
   "msg": "fri กระโดดตำแหน่งกะทันหัน (ภาพกระตุก/วาร์ป)"
  },
  {
-  "kind": "crop",
-  "start": 53.3,
-  "end": 53.3,
+  "kind": "identity",
+  "start": 53.6,
+  "end": 53.7,
   "shot": 15,
-  "severity": "กลาง",
+  "severity": "ต่ำ",
   "owner": "animator",
-  "msg": "ตัวละครหลุดขอบจอ/หัวขาด"
+  "msg": "pal โผล่ขึ้นกลางช็อต — เช็กว่าตรงคำพูด"
  },
  {
-  "kind": "teleport",
-  "start": 53.3,
-  "end": 53.4,
+  "kind": "identity",
+  "start": 53.6,
+  "end": 53.7,
   "shot": 15,
-  "severity": "สูง",
+  "severity": "ต่ำ",
   "owner": "animator",
-  "msg": "pal กระโดดตำแหน่งกะทันหัน (ภาพกระตุก/วาร์ป)"
- },
- {
-  "kind": "teleport",
-  "start": 53.3,
-  "end": 53.4,
-  "shot": 15,
-  "severity": "สูง",
-  "owner": "animator",
-  "msg": "sat กระโดดตำแหน่งกะทันหัน (ภาพกระตุก/วาร์ป)"
- },
- {
-  "kind": "teleport",
-  "start": 53.4,
-  "end": 53.5,
-  "shot": 15,
-  "severity": "สูง",
-  "owner": "animator",
-  "msg": "pal กระโดดตำแหน่งกะทันหัน (ภาพกระตุก/วาร์ป)"
- },
- {
-  "kind": "teleport",
-  "start": 53.4,
-  "end": 53.5,
-  "shot": 15,
-  "severity": "สูง",
-  "owner": "animator",
-  "msg": "sat กระโดดตำแหน่งกะทันหัน (ภาพกระตุก/วาร์ป)"
+  "msg": "sat โผล่ขึ้นกลางช็อต — เช็กว่าตรงคำพูด"
  },
  {
   "kind": "teleport",

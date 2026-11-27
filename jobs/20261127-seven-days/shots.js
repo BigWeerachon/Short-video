@@ -248,7 +248,8 @@ export default function (S) {
     const talk = t >= T(41) && t < E(41);
     drawChar(ctx, 'sat', { x: 660, y: 1400, scale: 1.75, mode: 'sit', expr: ask ? 'happy' : 'happy', eyes: t >= T(40) + 0.3 ? 'normal' : undefined, headDy: -10, talk,
       headphones: '#22c55e', arms: { l: 'down', r: ask ? 'shrug' : 'down' } });
-    S.qShape(ctx, 860, 560, 1.4, '#facc15', P(t, T(41) + 0.1, 0.35));
+    const qk = P(t, T(41) + 0.1, 0.35); // ดาวลอยวนเหนือหัวแทน ? (L12)
+    if (qk > 0) for (let i = 0; i < 3; i++) { const a = t * 3 + i * 2.1; S.star(ctx, 660 + Math.cos(a) * 120, 560 + Math.sin(a) * 30, 26 * pop(qk), '#facc15'); }
     drawChar(ctx, 'pal', { x: 200, y: 1760, scale: 1.25, mode: 'sit', expr: ask ? 'sweat' : 'happy', arms: { l: 'wheel', r: 'wheel' }, prop: { type: 'wheel' } });
   });
 
