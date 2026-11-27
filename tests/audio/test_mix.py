@@ -68,3 +68,11 @@ def test_ukulele_style_tonal_and_levels():
     y = karplus(440.0, 0.5, SR)
     f = np.fft.rfftfreq(len(y), 1 / SR)
     assert abs(f[np.abs(np.fft.rfft(y)).argmax()] - 440) < 15
+
+
+def test_mute_fade():
+    from engine.audio.mix import apply_mutes
+    v = apply_mutes(np.ones(SR), [(0.5, 0.6)], SR)
+    a, b = int(0.5 * SR), int(0.6 * SR)
+    assert np.all(v[a:b] == 0) and v[a - 1] < 0.05 and v[b] < 0.05
+    assert v[a - 600] == 1 and v[b + 600] == 1 and np.all(np.diff(v[a - 441:a]) <= 0)
