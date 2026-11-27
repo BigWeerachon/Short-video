@@ -80,8 +80,9 @@ export default function (S) {
     const kb = P(t, T(8), 0.4);
     if (kb > 0 && ok <= 0) {
       const blink = t >= T(9) ? (Math.sin(t * 16) > 0 ? 1 : 0.25) : 1;
-      ctx.globalAlpha = blink; S.briefcaseIcon(ctx, 260, 880, 1.3 * pop(kb)); ctx.globalAlpha = 1;
-      S.qShape(ctx, 420, 820, 1.1, '#ef4444', kb);
+      const sh = Math.sin(t * 40) * 10 * kb; // กระเป๋าสั่น = ลังเล (แทน ?)
+      ctx.save(); ctx.translate(sh, 0); ctx.rotate(Math.sin(t * 40) * 0.05);
+      ctx.globalAlpha = blink; S.briefcaseIcon(ctx, 260, 880, 1.3 * pop(kb)); ctx.globalAlpha = 1; ctx.restore();
     }
     S.phoneScreen(ctx, { x: 740, y: 900, s: 0.85, screen: 'custom', draw: bookScreen(ok), tap: tapAt(t, T(10), COL[0]) });
     S.flowers(ctx, { x: 300, y: 1250, r: 260, t, k: ok });
@@ -228,6 +229,7 @@ export default function (S) {
   // 15 เบาะหลังรถเพื่อน sat เอนชิล หูฟัง → ยืดตัว → ปัดปฏิทินจองทิ้ง → กอดหมอนซบหน้าต่าง
   shot(T(36), whip('#2e3460', (ctx, lt, t) => {
     S.carInterior(ctx, { view: 'back', t, scroll: t * 500, night: false });
+    if (lt < 0.32) return; // วาดตัวละครหลัง wipe จบ กันผีซ้อน/หัวขาดขอบ
     const stretch = t >= T(37) && t < T(38), hug = t >= T(39);
     const lean = hug ? 0.28 * eo(P(t, T(39), 0.4)) : stretch ? -0.12 : -0.2;
     const swat = t >= T(38) + 0.3 && t < T(39);
@@ -273,20 +275,20 @@ export default function (S) {
 
   // 19 ทั้ง 7 วุ่นวายตามนิสัย → ดาวหมุนเหนือหัว
   const chaos = [
-    { id: 'mon', x: 150, y: 1060, arms: { l: 'hips', r: 'unroll' }, prop: { type: 'calendarBig', unroll: 1, len: 380 }, expr: 'smug' },
-    { id: 'tue', x: 410, y: 1060, mode: 'walk', expr: 'fire' },
-    { id: 'wed', x: 670, y: 1060, arms: { l: 'hold', r: 'magnify' }, prop: { type: 'magnifier' }, expr: 'happy' },
-    { id: 'thu', x: 930, y: 1060, arms: { l: { x: -16, y: -120, bend: 'down' }, r: { x: -10, y: -160, bend: 'down' } }, prop: { type: 'calculator', hand: 'l' }, expr: 'swirl' },
-    { id: 'fri', x: 200, y: 1500, arms: { l: 'hips', r: 'selfie' }, prop: { type: 'selfieStick', len: 120 }, expr: 'grin' },
+    { id: 'mon', x: 130, y: 1060, arms: { l: 'hips', r: 'unroll' }, prop: { type: 'calendarBig', unroll: 1, len: 300 }, expr: 'smug' },
+    { id: 'tue', x: 420, y: 1060, mode: 'walk', expr: 'fire' },
+    { id: 'wed', x: 680, y: 1060, arms: { l: 'hold', r: 'magnify' }, prop: { type: 'magnifier' }, expr: 'happy' },
+    { id: 'thu', x: 950, y: 1060, arms: { l: { x: -16, y: -120, bend: 'down' }, r: { x: -10, y: -160, bend: 'down' } }, prop: { type: 'calculator', hand: 'l' }, expr: 'swirl' },
+    { id: 'fri', x: 170, y: 1500, arms: { l: 'hips', r: 'selfie' }, prop: { type: 'selfieStick', len: 120 }, expr: 'grin' },
     { id: 'sat', x: 540, y: 1470, mode: 'sit', lean: 0.2, arms: { l: 'hug', r: 'hug' }, prop: { type: 'pillow' }, expr: 'bliss', headphones: '#22c55e' },
-    { id: 'sun', x: 880, y: 1500, arms: { l: 'hips', r: 'point' }, expr: 'smug' },
+    { id: 'sun', x: 900, y: 1500, arms: { l: 'hips', r: 'point' }, expr: 'smug' },
   ];
   shot(T(49), (ctx, lt, t) => {
     S.stripes7(ctx, { t: t * 3 });
     const hard = t >= T(50);
     chaos.forEach((c, i) => {
       const k = P(t, T(49) + i * 0.12, 0.35); if (k <= 0) return;
-      const sc = (i < 4 ? 0.9 : 1.0) * pop(k), j = hard ? Math.sin(t * 20 + i) * 8 : 0;
+      const sc = (i < 4 ? 0.82 : 0.92) * pop(k), j = hard ? Math.sin(t * 20 + i) * 8 : 0;
       drawChar(ctx, c.id, { ...c, x: c.x + j, y: c.y - (hard ? Math.abs(Math.sin(t * 8 + i)) * 16 : 0), scale: sc, walkPhase: t * 14 });
       if (hard) for (let s = 0; s < 3; s++) { const a = t * 6 + s * 2.1; S.star(ctx, c.x + Math.cos(a) * 60, c.y - 300 * sc - 40 + Math.sin(a) * 18, 16 * P(t, T(50), 0.3), '#facc15'); }
     });
